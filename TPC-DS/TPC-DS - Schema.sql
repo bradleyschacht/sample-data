@@ -1,4 +1,29 @@
 DROP TABLE IF EXISTS dbo.call_center;
+DROP TABLE IF EXISTS dbo.catalog_page;
+DROP TABLE IF EXISTS dbo.catalog_returns;
+DROP TABLE IF EXISTS dbo.catalog_sales;
+DROP TABLE IF EXISTS dbo.customer;
+DROP table IF EXISTS customer_address;
+DROP TABLE IF EXISTS dbo.customer_demographics;
+DROP TABLE IF EXISTS dbo.date_dim;
+DROP TABLE IF EXISTS dbo.household_demographics;
+DROP TABLE IF EXISTS dbo.income_band;
+DROP TABLE IF EXISTS dbo.inventory;
+DROP TABLE IF EXISTS dbo.item;
+DROP TABLE IF EXISTS dbo.promotion;
+DROP TABLE IF EXISTS dbo.reason;
+DROP TABLE IF EXISTS dbo.ship_mode;
+DROP TABLE IF EXISTS dbo.store;
+DROP TABLE IF EXISTS dbo.store_returns;
+DROP TABLE IF EXISTS dbo.store_sales;
+DROP TABLE IF EXISTS dbo.time_dim;
+DROP TABLE IF EXISTS dbo.warehouse;
+DROP TABLE IF EXISTS dbo.web_page;
+DROP TABLE IF EXISTS dbo.web_returns;
+DROP TABLE IF EXISTS dbo.web_sales;
+DROP TABLE IF EXISTS dbo.web_site;
+
+
 CREATE TABLE dbo.call_center
 	(
 		cc_call_center_sk         integer               not null,
@@ -35,7 +60,6 @@ CREATE TABLE dbo.call_center
 	);
 
 
-DROP TABLE IF EXISTS dbo.catalog_page;
 CREATE TABLE dbo.catalog_page
 	(
 		cp_catalog_page_sk        integer               not null,
@@ -50,7 +74,6 @@ CREATE TABLE dbo.catalog_page
 	);
 
 
-DROP TABLE IF EXISTS dbo.catalog_returns;
 CREATE TABLE dbo.catalog_returns
 	(
 		cr_returned_date_sk       integer                       ,
@@ -83,7 +106,6 @@ CREATE TABLE dbo.catalog_returns
 	);
 
 
-DROP TABLE IF EXISTS dbo.catalog_sales;
 CREATE TABLE dbo.catalog_sales
 	(
 		cs_sold_date_sk           integer                       ,
@@ -123,7 +145,6 @@ CREATE TABLE dbo.catalog_sales
 	);
 
 
-DROP TABLE IF EXISTS dbo.customer;
 CREATE TABLE dbo.customer
 	(
 		c_customer_sk             integer               not null,
@@ -147,7 +168,6 @@ CREATE TABLE dbo.customer
 	);
 
 
-DROP table IF EXISTS customer_address;
 CREATE TABLE dbo.customer_address
 	(
 		ca_address_sk             integer               not null,
@@ -166,7 +186,6 @@ CREATE TABLE dbo.customer_address
 	);
 
 
-DROP TABLE IF EXISTS dbo.customer_demographics;
 CREATE TABLE dbo.customer_demographics
 	(
 		cd_demo_sk                integer               not null,
@@ -181,7 +200,6 @@ CREATE TABLE dbo.customer_demographics
 	);
 
 
-DROP TABLE IF EXISTS dbo.date_dim;
 CREATE TABLE dbo.date_dim
 	(
 		d_date_sk                 integer               not null,
@@ -215,7 +233,6 @@ CREATE TABLE dbo.date_dim
 	);
 
 
-DROP TABLE IF EXISTS dbo.household_demographics;
 CREATE TABLE dbo.household_demographics
 	(
 		hd_demo_sk                integer               not null,
@@ -226,7 +243,6 @@ CREATE TABLE dbo.household_demographics
 	);
 
 
-DROP TABLE IF EXISTS dbo.income_band;
 CREATE TABLE dbo.income_band
 	(
 		ib_income_band_sk         integer               not null,
@@ -235,7 +251,6 @@ CREATE TABLE dbo.income_band
 	);
 
 
-DROP TABLE IF EXISTS dbo.inventory;
 CREATE TABLE dbo.inventory
 	(
 		inv_date_sk               integer               not null,
@@ -245,7 +260,6 @@ CREATE TABLE dbo.inventory
 	);
 
 
-DROP TABLE IF EXISTS dbo.item;
 CREATE TABLE dbo.item
 	(
 		i_item_sk                 integer               not null,
@@ -273,7 +287,6 @@ CREATE TABLE dbo.item
 	);
 
 
-DROP TABLE IF EXISTS dbo.promotion;
 CREATE TABLE dbo.promotion
 	(
 		p_promo_sk                integer               not null,
@@ -298,7 +311,6 @@ CREATE TABLE dbo.promotion
 	);
 
 
-DROP TABLE IF EXISTS dbo.reason;
 CREATE TABLE dbo.reason
 	(
 		r_reason_sk               integer               not null,
@@ -307,7 +319,6 @@ CREATE TABLE dbo.reason
 	);
 
 
-DROP TABLE IF EXISTS dbo.ship_mode;
 CREATE TABLE dbo.ship_mode
 	(
 		sm_ship_mode_sk           integer               not null,
@@ -319,7 +330,6 @@ CREATE TABLE dbo.ship_mode
 	);
 
 
-DROP TABLE IF EXISTS dbo.store;
 CREATE TABLE dbo.store
 	(
 		s_store_sk                integer               not null,
@@ -354,7 +364,6 @@ CREATE TABLE dbo.store
 	);
 
 
-DROP TABLE IF EXISTS dbo.store_returns;
 CREATE TABLE dbo.store_returns
 	(
 		sr_returned_date_sk       integer                       ,
@@ -380,7 +389,6 @@ CREATE TABLE dbo.store_returns
 	);
 
 
-DROP TABLE IF EXISTS dbo.store_sales;
 CREATE TABLE dbo.store_sales
 	(
 		ss_sold_date_sk           integer                       ,
@@ -409,7 +417,6 @@ CREATE TABLE dbo.store_sales
 	);
 
 
-DROP TABLE IF EXISTS dbo.time_dim;
 CREATE TABLE dbo.time_dim
 	(
 		t_time_sk                 integer               not null,
@@ -425,7 +432,6 @@ CREATE TABLE dbo.time_dim
 	);
 
 
-DROP TABLE IF EXISTS dbo.warehouse;
 CREATE TABLE dbo.warehouse
 	(
 		w_warehouse_sk            integer               not null,
@@ -445,7 +451,6 @@ CREATE TABLE dbo.warehouse
 	);
 
 
-DROP TABLE IF EXISTS dbo.web_page;
 CREATE TABLE dbo.web_page
 	(
 		wp_web_page_sk            integer               not null,
@@ -465,7 +470,6 @@ CREATE TABLE dbo.web_page
 	);
 
 
-DROP TABLE IF EXISTS dbo.web_returns;
 CREATE TABLE dbo.web_returns
 	(
 		wr_returned_date_sk       integer                       ,
@@ -495,7 +499,6 @@ CREATE TABLE dbo.web_returns
 	);
 
 
-DROP TABLE IF EXISTS dbo.web_sales;
 CREATE TABLE dbo.web_sales
 	(
 		ws_sold_date_sk           integer                       ,
@@ -535,7 +538,6 @@ CREATE TABLE dbo.web_sales
 	);
 
 
-DROP TABLE IF EXISTS dbo.web_site;
 CREATE TABLE dbo.web_site
 	(
 		web_site_sk               integer               not null,
