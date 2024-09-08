@@ -36,18 +36,20 @@ SET	@count_supplier 	= 10000. 	* @ScaleFactorInGB
 
 
 SELECT
-	'__ Total Record Count __' 								AS TableName,
-	FORMAT(SUM(RecordCount), 'N0') 							AS RecordCount,
-	FORMAT(SUM(ExpectedRecordCount), 'N0') 					AS ExpectedRecordCount,
-	FORMAT(SUM(RecordCount - ExpectedRecordCount), 'N0')	AS RecordCountDifference
+	'__ Total Record Count __' 																AS TableName,
+	FORMAT(SUM(RecordCount), 'N0') 															AS RecordCount,
+	FORMAT(SUM(ExpectedRecordCount), 'N0') 													AS ExpectedRecordCount,
+	FORMAT(SUM(RecordCount - ExpectedRecordCount), 'N0')									AS RecordCountDifference,
+	FORMAT(1.0 * SUM(RecordCount - ExpectedRecordCount) / SUM(ExpectedRecordCount), 'P4')	AS RecordPercentageDifference
 FROM RecordCounts
 
 UNION ALL 
 
 SELECT
 	TableName,
-	FORMAT(RecordCount, 'N0') 							AS RecordCount,
-	FORMAT(ExpectedRecordCount, 'N0') 					AS ExpectedRecordCount, 
-	FORMAT(RecordCount - ExpectedRecordCount, 'N0') 	AS RecordCountDifference
+	FORMAT(RecordCount, 'N0') 																AS RecordCount,
+	FORMAT(ExpectedRecordCount, 'N0') 														AS ExpectedRecordCount, 
+	FORMAT(RecordCount - ExpectedRecordCount, 'N0') 										AS RecordCountDifference,
+	FORMAT((1.0 * RecordCount - ExpectedRecordCount) / ExpectedRecordCount, 'P4')			AS RecordPercentageDifference
 FROM RecordCounts
 ORDER BY TableName
