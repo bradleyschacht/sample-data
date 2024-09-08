@@ -28,7 +28,7 @@ INSERT INTO dbo.web_sales 				SELECT * FROM ' + @LakehouseName + '.dbo.web_sales
 INSERT INTO dbo.web_site 				SELECT * FROM ' + @LakehouseName + '.dbo.web_site;
 ')
 
-/*  Use this section to load the data warehouse from files in ADLS Gen2.  */
+/*  Use this section to load the data warehouse from parquet files in ADLS Gen2.  */
 DECLARE @StorageAccountName 		VARCHAR(250) = ''
 DECLARE @StorageAccountDirectory 	VARCHAR(250) = ''
 DECLARE @SharedAccessSignature		VARCHAR(250) = ''
@@ -58,4 +58,37 @@ COPY INTO dbo.web_page 					FROM ''https://' + @StorageAccountName + '.blob.core
 COPY INTO dbo.web_returns 				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/web_returns/*.parquet'' 				WITH (FILE_TYPE = ''PARQUET'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
 COPY INTO dbo.web_sales 				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/web_sales/*.parquet'' 				WITH (FILE_TYPE = ''PARQUET'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
 COPY INTO dbo.web_site 					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/web_site/*.parquet'' 					WITH (FILE_TYPE = ''PARQUET'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+')
+
+/*  Use this section to load the data warehouse from the raw dat files in ADLS Gen2.  */
+DECLARE @StorageAccountName 		VARCHAR(250) = ''
+DECLARE @StorageAccountDirectory 	VARCHAR(250) = ''
+DECLARE @SharedAccessSignature		VARCHAR(250) = ''
+
+EXEC('
+COPY INTO dbo.call_center				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/call_center/*.dat''				WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.catalog_page				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/catalog_page/*.dat''				WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.catalog_returns			FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/catalog_returns/*.dat''			WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.catalog_sales				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/catalog_sales/*.dat''				WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.customer					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/customer/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.customer_address			FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/customer_address/*.dat''			WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.customer_demographics		FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/customer_demographics/*.dat''		WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.date_dim					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/date_dim/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.dbgen_version				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/dbgen_version/*.dat''				WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.household_demographics	FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/household_demographics/*.dat''	WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.income_band				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/income_band/*.dat''				WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.inventory					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/inventory/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.item						FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/item/*.dat''						WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.promotion					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/promotion/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.reason					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/reason/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.ship_mode					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/ship_mode/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.store						FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/store/*.dat''						WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.store_returns				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/store_returns/*.dat''				WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.store_sales				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/store_sales/*.dat''				WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.time_dim					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/time_dim/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.warehouse					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/warehouse/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.web_page					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/web_page/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.web_returns				FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/web_returns/*.dat''				WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.web_sales					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/web_sales/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
+COPY INTO dbo.web_site					FROM ''https://' + @StorageAccountName + '.blob.core.windows.net/' + @StorageAccountDirectory + '/web_site/*.dat''					WITH (FILE_TYPE = ''CSV'', FIELDTERMINATOR = ''|'', CREDENTIAL = (IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''' + @SharedAccessSignature + '''));
 ')

@@ -1,4 +1,13 @@
 DECLARE @ScaleFactorInGB INT = 1
+/*
+Valid Scale Factors: 
+	1 GB:	1
+	1 TB:	1000
+	3 TB:	3000
+	10 TB:	10000
+	30 TB:  30000
+	100 TB:	100000
+*/
 
 
 DECLARE
@@ -232,18 +241,20 @@ IF @ScaleFactorInGB = 100000
 
 
 SELECT
-	'__ Total Record Count __' 								AS TableName,
-	FORMAT(SUM(RecordCount), 'N0') 							AS RecordCount,
-	FORMAT(SUM(ExpectedRecordCount), 'N0') 					AS ExpectedRecordCount,
-	FORMAT(SUM(RecordCount - ExpectedRecordCount), 'N0')	AS RecordCountDifference
+	'__ Total Record Count __' 																AS TableName,
+	FORMAT(SUM(RecordCount), 'N0') 															AS RecordCount,
+	FORMAT(SUM(ExpectedRecordCount), 'N0') 													AS ExpectedRecordCount,
+	FORMAT(SUM(RecordCount - ExpectedRecordCount), 'N0')									AS RecordCountDifference,
+	FORMAT(1.0 * SUM(RecordCount - ExpectedRecordCount) / SUM(ExpectedRecordCount), 'P4')	AS RecordPercentageDifference
 FROM RecordCounts
 
 UNION ALL 
 
 SELECT
 	TableName,
-	FORMAT(RecordCount, 'N0') 							AS RecordCount,
-	FORMAT(ExpectedRecordCount, 'N0') 					AS ExpectedRecordCount, 
-	FORMAT(RecordCount - ExpectedRecordCount, 'N0') 	AS RecordCountDifference
+	FORMAT(RecordCount, 'N0') 																AS RecordCount,
+	FORMAT(ExpectedRecordCount, 'N0') 														AS ExpectedRecordCount, 
+	FORMAT(RecordCount - ExpectedRecordCount, 'N0') 										AS RecordCountDifference,
+	FORMAT((1.0 * RecordCount - ExpectedRecordCount) / ExpectedRecordCount, 'P4')			AS RecordPercentageDifference
 FROM RecordCounts
 ORDER BY TableName
