@@ -76,7 +76,7 @@ function Invoke-dbgen {
 
             # Tables with multiple chunks. 
             elseif ($Chunks -gt 1) {
-                .\dbgen.exe -s $ScaleFactor -T $Table -v -f -C $Chunks -S $Slice
+                .\dbgen.exe -s $ScaleFactor -T $Table -v -f -C $Chunks -S $Chunk
             }
         }
 
