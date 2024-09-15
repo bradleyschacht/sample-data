@@ -39,6 +39,11 @@ $ChunkEndSupplier       = 0
 # Change directory to the folder that contains dbgen.
 Set-Location $dbgenFolder
 
+# Create the output folder if it does not exist.
+if (!(Test-Path $OutputFolder)) {
+    New-Item -ItemType Directory -Path $OutputFolder
+}
+
 # Set number of parallel threads.
 $SetThrottleLimit = Start-ThreadJob -ScriptBlock {Start-Sleep 0} -ThrottleLimit $ParallelJobs
 Wait-Job $SetThrottleLimit
@@ -51,7 +56,8 @@ function Invoke-dbgen {
         $TableName,
         $Chunks,
         $ChunkOverrideStart,
-        $ChunkOverrideEnd
+        $ChunkOverrideEnd,
+        $OutputFolder
     )
 
     $ChunkStart = 1
@@ -67,37 +73,43 @@ function Invoke-dbgen {
 
         $ScriptBlock = 
         {
-            param($ScaleFactor, $Table, $Chunk, $Chunks)
+            param($ScaleFactor, $Table, $Chunk, $Chunks, $OutputFolder, $TableName)
+
+            # Create the output directory if it does not exist. 
+            $OutputSubfolder = Join-Path -Path $OutputFolder -ChildPath $TableName
+            New-Item -Path $OutputSubfolder -ItemType Directory -ErrorAction SilentlyContinue
             
             # Tables with only a single chunk.
             if ($Chunks -eq 1) {
                 .\dbgen.exe -s $ScaleFactor -T $Table -v -f
+                Get-ChildItem -File "$TableName.tbl" | Move-Item -Destination $OutputSubfolder -Force -ErrorAction SilentlyContinue
             }
 
             # Tables with multiple chunks. 
             elseif ($Chunks -gt 1) {
                 .\dbgen.exe -s $ScaleFactor -T $Table -v -f -C $Chunks -S $Chunk
+                Get-ChildItem -File "$TableName.tbl.$Chunk" | Move-Item -Destination $OutputSubfolder -Force -ErrorAction SilentlyContinue
             }
         }
 
         if ($Chunks -gt 0) {
-            $null = Start-ThreadJob -Name $JobName -ScriptBlock $ScriptBlock -ArgumentList $ScaleFactor, $Table, $Chunk, $Chunks
+            $null = Start-ThreadJob -Name $JobName -ScriptBlock $ScriptBlock -ArgumentList $ScaleFactor, $Table, $Chunk, $Chunks, $OutputFolder, $TableName
         }    
     }
 
 }
 
 <# Generate the single file datasets. #>
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "n" -TableName "nation"       -Chunks $ChunksNation   -ChunkOverrideStart 1                   -ChunkOverrideEnd 1                     # nation
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "r" -TableName "region"       -Chunks $ChunksRegion   -ChunkOverrideStart 1                   -ChunkOverrideEnd 1                     # region
+Invoke-dbgen -ScaleFactor $ScaleFactor -Table "n" -TableName "nation"       -Chunks $ChunksNation   -ChunkOverrideStart 1                   -ChunkOverrideEnd 1                     -OutputFolder $OutputFolder     # nation
+Invoke-dbgen -ScaleFactor $ScaleFactor -Table "r" -TableName "region"       -Chunks $ChunksRegion   -ChunkOverrideStart 1                   -ChunkOverrideEnd 1                     -OutputFolder $OutputFolder     # region
 
 <# Generate the multi-chunk datasets. #>
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "c" -TableName "customer"     -Chunks $ChunksCustomer -ChunkOverrideStart $ChunkStartCustomer -ChunkOverrideEnd $ChunkEndCustomer     # customer
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "L" -TableName "lineitem"     -Chunks $ChunksLineItem -ChunkOverrideStart $ChunkStartLineItem -ChunkOverrideEnd $ChunkEndLineItem     # lineitem
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "O" -TableName "orders"       -Chunks $ChunksOrders   -ChunkOverrideStart $ChunkStartOrders   -ChunkOverrideEnd $ChunkEndOrders       # orders
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "P" -TableName "part"         -Chunks $ChunksPart     -ChunkOverrideStart $ChunkStartPart     -ChunkOverrideEnd $ChunkEndPart         # part
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "S" -TableName "partsupp"     -Chunks $ChunksPartSupp -ChunkOverrideStart $ChunkStartPartSupp -ChunkOverrideEnd $ChunkEndPartSupp     # partsupp
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "s" -TableName "supplier"     -Chunks $ChunksSupplier -ChunkOverrideStart $ChunkStartSupplier -ChunkOverrideEnd $ChunkEndSupplier     # supplier
+Invoke-dbgen -ScaleFactor $ScaleFactor -Table "c" -TableName "customer"     -Chunks $ChunksCustomer -ChunkOverrideStart $ChunkStartCustomer -ChunkOverrideEnd $ChunkEndCustomer     -OutputFolder $OutputFolder     # customer
+Invoke-dbgen -ScaleFactor $ScaleFactor -Table "L" -TableName "lineitem"     -Chunks $ChunksLineItem -ChunkOverrideStart $ChunkStartLineItem -ChunkOverrideEnd $ChunkEndLineItem     -OutputFolder $OutputFolder     # lineitem
+Invoke-dbgen -ScaleFactor $ScaleFactor -Table "O" -TableName "orders"       -Chunks $ChunksOrders   -ChunkOverrideStart $ChunkStartOrders   -ChunkOverrideEnd $ChunkEndOrders       -OutputFolder $OutputFolder     # orders
+Invoke-dbgen -ScaleFactor $ScaleFactor -Table "P" -TableName "part"         -Chunks $ChunksPart     -ChunkOverrideStart $ChunkStartPart     -ChunkOverrideEnd $ChunkEndPart         -OutputFolder $OutputFolder     # part
+Invoke-dbgen -ScaleFactor $ScaleFactor -Table "S" -TableName "partsupp"     -Chunks $ChunksPartSupp -ChunkOverrideStart $ChunkStartPartSupp -ChunkOverrideEnd $ChunkEndPartSupp     -OutputFolder $OutputFolder     # partsupp
+Invoke-dbgen -ScaleFactor $ScaleFactor -Table "s" -TableName "supplier"     -Chunks $ChunksSupplier -ChunkOverrideStart $ChunkStartSupplier -ChunkOverrideEnd $ChunkEndSupplier     -OutputFolder $OutputFolder     # supplier
 
 <#
     # Run this command if you need to pull a list of all the jobs.
@@ -125,30 +137,4 @@ Invoke-dbgen -ScaleFactor $ScaleFactor -Table "s" -TableName "supplier"     -Chu
     
     # Run this command to remove all the jobs.
     Get-Job | Remove-Job
-#>
-
-<# Create subdirectories for each table then move files into the appropriate directory.
-    # Create the output folder if it does not exist.
-    if (!(Test-Path $OutputFolder)) {
-        New-Item -ItemType Directory -Path $OutputFolder
-    }
-
-    # Move files into subfolders. Make sure to move partsupp before part due to string matching.
-    $FileList =
-        (
-            'customer', 
-            'lineitem', 
-            'nation', 
-            'orders', 
-            'partsupp', 
-            'part', 
-            'region', 
-            'supplier'
-        )
-
-    foreach ($FileName in $FileList)
-        {
-            New-Item -Path (Join-Path -Path $OutputFolder -ChildPath $FileName) -ItemType Directory -ErrorAction SilentlyContinue
-            Get-ChildItem -File "$FileName*" | Move-Item -Destination (Join-Path -Path $OutputFolder -ChildPath $FileName) -Force -ErrorAction SilentlyContinue
-        }
 #>
