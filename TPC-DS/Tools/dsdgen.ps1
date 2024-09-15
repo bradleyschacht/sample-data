@@ -100,14 +100,18 @@ function Invoke-dsdgen {
         {
             param($ScaleFactor, $Table, $Chunk, $Chunks, $OutputFolder)
 
+            # Create the output directory if it does not exist. 
+            $OutputSubfolder = Join-Path -Path $OutputFolder -ChildPath $Table
+            New-Item -Path $OutputSubfolder -ItemType Directory -ErrorAction SilentlyContinue
+
             # Tables with only a single chunk.
             if ($Chunks -eq 1) {
-                .\dsdgen.exe -dir $OutputFolder -VERBOSE -FORCE -SCALE $ScaleFactor -TABLE $Table  
+                .\dsdgen.exe -dir $OutputSubfolder -VERBOSE -FORCE -SCALE $ScaleFactor -TABLE $Table  
             }
             
             # Tables with multiple chunks. 
             elseif ($Chunks -gt 1) {
-                .\dsdgen.exe -dir $OutputFolder -VERBOSE -FORCE -SCALE $ScaleFactor -PARALLEL $Chunks -CHILD $Chunk -TABLE $Table
+                .\dsdgen.exe -dir $OutputSubfolder -VERBOSE -FORCE -SCALE $ScaleFactor -PARALLEL $Chunks -CHILD $Chunk -TABLE $Table
             }
         }
 
