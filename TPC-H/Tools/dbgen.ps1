@@ -1,28 +1,35 @@
-$dbgenFolder            = "C:\TPCH"         # Directory where dbgen.exe and dists.dss are stored.
-$OutputFolder           = "C:\TPCH\GB_001"  # Directory where all the generated files should be stored upon completion. This requires a portion of the script that is commented out.
-$ScaleFactor            = 1                 # Measured in GB.
-$ParallelJobs           = 1                 # Number of parallel data generation jobs.
+# dbgen parameters.
+$dbgenDirectory = "C:\TPCH\dbgen"    # Directory where dbgen.exe and dists.dss are stored. This is also the directory where the files will be generated and temporarily stored before being moved to the $OutputFolder directory.
+$OutputFolder   = "C:\TPCH\GB_001"   # Directory where all the generated files should be stored upon completion. This requires a portion of the script that is commented out.
+$ScaleFactor    = 1   # Measured in GB.
+$ParallelJobs   = 1   # Number of parallel data generation jobs.
 
-# Should the following single chunk tables be generated?
-$ChunksNation       = 1
-$ChunksRegion       = 1
+
+# Which tables should be generated?
+$Customer    = $true
+$LineItem    = $true
+$Nation      = $true
+$Orders      = $true
+$Part        = $true
+$PartSupp    = $true
+$Region      = $true
+$Supplier    = $true
+
 
 # How many chunks should be generated for each table?
+# Nation only generates a single chunk.
+# Region only generates a single chunk.
 $ChunksCustomer     = 1
 $ChunksLineItem     = 1
 $ChunksOrders       = 1
 $ChunksPart         = 1
 $ChunksPartSupp     = 1
-$ChunksSupplier     = 1
+$ChunksSupplier     = 1   
 
-<# Only make changes below this line after reviewing and testing the modifications. #>
 
-# Which chunks should be generated for each table?
-# The following tables only generate a single chunk.
-# nation
-# region
-
-# The following tables are multi-chunk.
+# Should a specific range of chunks be generated? If so, change the start or end values. A 0 for the chunk start will default to 1. A 0 for the chunk end will default to the max chunk number. This is useful if you need to split the data generation between multiple computers or if something causes a failure in the middle and you would like to pick up where you left off.
+# Nation only generates a single chunk.
+# Region only generates a single chunk.
 $ChunkStartCustomer     = 0
 $ChunkEndCustomer       = 0
 $ChunkStartLineItem     = 0
@@ -36,21 +43,27 @@ $ChunkEndPartSupp       = 0
 $ChunkStartSupplier     = 0
 $ChunkEndSupplier       = 0
 
+
+<#    !!! Only make changes below this line after reviewing and testing the modifications !!!    #>
+
+
 # Change directory to the folder that contains dbgen.
-Set-Location $dbgenFolder
+Set-Location $dbgenDirectory
 
 # Create the output folder if it does not exist.
 if (!(Test-Path $OutputFolder)) {
     New-Item -ItemType Directory -Path $OutputFolder
 }
 
-# Set number of parallel threads.
+# Set number of parallel data generation threads.
 $SetThrottleLimit = Start-ThreadJob -ScriptBlock {Start-Sleep 0} -ThrottleLimit $ParallelJobs
 Wait-Job $SetThrottleLimit
 Remove-Job $SetThrottleLimit
 
+# Create the function that calls the dbgen executable which generates the data.
 function Invoke-dbgen {
     param (
+        $GenerateData,
         $ScaleFactor,
         $Table,
         $TableName,
@@ -60,59 +73,69 @@ function Invoke-dbgen {
         $OutputFolder
     )
 
-    $ChunkStart = 1
-    $ChunkEnd = $Chunks
-    
-    if ($ChunkOverrideStart -gt 0) {$ChunkStart = $ChunkOverrideStart}
-    if ($ChunkOverrideEnd -gt 0) {$ChunkEnd = $ChunkOverrideEnd}
+    # If no override values are provided set the starting chunk to 1 and the ending chunk to the total number of chunks. Otherwise, use the override values.
+    if ($ChunkOverrideStart -gt 0) {$ChunkStart = $ChunkOverrideStart} else {$ChunkStart = 1}
+    if ($ChunkOverrideEnd -gt 0) {$ChunkEnd = $ChunkOverrideEnd} else {$ChunkEnd = $Chunks}
 
     $ChunkStart..$ChunkEnd | ForEach-Object {
-
         $Chunk = $_
-        $JobName = $TableName + " "  + ("00000" + $Chunk).Substring(("00000" + $Chunk).Length - 5) + " of " + ("00000" + $Chunks).Substring(("00000" + $Chunks).Length - 5)
-
+        
         $ScriptBlock = 
         {
-            param($ScaleFactor, $Table, $Chunk, $Chunks, $OutputFolder, $TableName)
+            param (
+                $ScaleFactor, 
+                $Table, 
+                $Chunk, 
+                $Chunks, 
+                $OutputFolder, 
+                $TableName
+            )
 
-            # Create the output directory if it does not exist. 
+            # Create the output directory if it does not exist.
             $OutputSubfolder = Join-Path -Path $OutputFolder -ChildPath $TableName
-            New-Item -Path $OutputSubfolder -ItemType Directory -ErrorAction SilentlyContinue
+            if (!(Test-Path $OutputSubfolder)) {
+                New-Item -Path $OutputSubfolder -ItemType Directory
+            }
             
             # Tables with only a single chunk.
             if ($Chunks -eq 1) {
                 .\dbgen.exe -s $ScaleFactor -T $Table -v -f
-                Get-ChildItem -File "$TableName.tbl" | Move-Item -Destination $OutputSubfolder -Force -ErrorAction SilentlyContinue
+                Move-Item -Path ("{0}.tbl" -f $TableName) -Destination $OutputSubfolder -Force -ErrorAction SilentlyContinue
             }
 
             # Tables with multiple chunks. 
             elseif ($Chunks -gt 1) {
                 .\dbgen.exe -s $ScaleFactor -T $Table -v -f -C $Chunks -S $Chunk
-                Get-ChildItem -File "$TableName.tbl.$Chunk" | Move-Item -Destination $OutputSubfolder -Force -ErrorAction SilentlyContinue
+                Move-Item -Path ("{0}.tbl.{1}" -f $TableName, $Chunk) -Destination $OutputSubfolder -Force -ErrorAction SilentlyContinue
             }
         }
 
-        if ($Chunks -gt 0) {
+        if ($Chunks -gt 0 -and $GenerateData -eq $true) {
+            $JobName = "Scale Factor: " + $ScaleFactor + " | Table: " + $TableName + " | Chunk: "  + ("00000" + $Chunk).Substring(("00000" + $Chunk).Length - 5) + " of " + ("00000" + $Chunks).Substring(("00000" + $Chunks).Length - 5)
             $null = Start-ThreadJob -Name $JobName -ScriptBlock $ScriptBlock -ArgumentList $ScaleFactor, $Table, $Chunk, $Chunks, $OutputFolder, $TableName
         }    
     }
 
 }
 
-<# Generate the single file datasets. #>
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "n" -TableName "nation"       -Chunks $ChunksNation   -ChunkOverrideStart 1                   -ChunkOverrideEnd 1                     -OutputFolder $OutputFolder     # nation
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "r" -TableName "region"       -Chunks $ChunksRegion   -ChunkOverrideStart 1                   -ChunkOverrideEnd 1                     -OutputFolder $OutputFolder     # region
+# Generate the single file datasets.
+Invoke-dbgen -GenerateData $Nation      -ScaleFactor $ScaleFactor -OutputFolder $OutputFolder -Table "n" -TableName "nation"       -Chunks 1                -ChunkOverrideStart 1                   -ChunkOverrideEnd 1                     # nation
+Invoke-dbgen -GenerateData $Region      -ScaleFactor $ScaleFactor -OutputFolder $OutputFolder -Table "r" -TableName "region"       -Chunks 1                -ChunkOverrideStart 1                   -ChunkOverrideEnd 1                     # region
 
-<# Generate the multi-chunk datasets. #>
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "c" -TableName "customer"     -Chunks $ChunksCustomer -ChunkOverrideStart $ChunkStartCustomer -ChunkOverrideEnd $ChunkEndCustomer     -OutputFolder $OutputFolder     # customer
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "L" -TableName "lineitem"     -Chunks $ChunksLineItem -ChunkOverrideStart $ChunkStartLineItem -ChunkOverrideEnd $ChunkEndLineItem     -OutputFolder $OutputFolder     # lineitem
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "O" -TableName "orders"       -Chunks $ChunksOrders   -ChunkOverrideStart $ChunkStartOrders   -ChunkOverrideEnd $ChunkEndOrders       -OutputFolder $OutputFolder     # orders
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "P" -TableName "part"         -Chunks $ChunksPart     -ChunkOverrideStart $ChunkStartPart     -ChunkOverrideEnd $ChunkEndPart         -OutputFolder $OutputFolder     # part
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "S" -TableName "partsupp"     -Chunks $ChunksPartSupp -ChunkOverrideStart $ChunkStartPartSupp -ChunkOverrideEnd $ChunkEndPartSupp     -OutputFolder $OutputFolder     # partsupp
-Invoke-dbgen -ScaleFactor $ScaleFactor -Table "s" -TableName "supplier"     -Chunks $ChunksSupplier -ChunkOverrideStart $ChunkStartSupplier -ChunkOverrideEnd $ChunkEndSupplier     -OutputFolder $OutputFolder     # supplier
+# Generate the multi-chunk datasets.
+Invoke-dbgen -GenerateData $Customer    -ScaleFactor $ScaleFactor -OutputFolder $OutputFolder -Table "c" -TableName "customer"     -Chunks $ChunksCustomer -ChunkOverrideStart $ChunkStartCustomer -ChunkOverrideEnd $ChunkEndCustomer     # customer
+Invoke-dbgen -GenerateData $LineItem    -ScaleFactor $ScaleFactor -OutputFolder $OutputFolder -Table "L" -TableName "lineitem"     -Chunks $ChunksLineItem -ChunkOverrideStart $ChunkStartLineItem -ChunkOverrideEnd $ChunkEndLineItem     # lineitem
+Invoke-dbgen -GenerateData $Orders      -ScaleFactor $ScaleFactor -OutputFolder $OutputFolder -Table "O" -TableName "orders"       -Chunks $ChunksOrders   -ChunkOverrideStart $ChunkStartOrders   -ChunkOverrideEnd $ChunkEndOrders       # orders
+Invoke-dbgen -GenerateData $Part        -ScaleFactor $ScaleFactor -OutputFolder $OutputFolder -Table "P" -TableName "part"         -Chunks $ChunksPart     -ChunkOverrideStart $ChunkStartPart     -ChunkOverrideEnd $ChunkEndPart         # part
+Invoke-dbgen -GenerateData $PartSupp    -ScaleFactor $ScaleFactor -OutputFolder $OutputFolder -Table "S" -TableName "partsupp"     -Chunks $ChunksPartSupp -ChunkOverrideStart $ChunkStartPartSupp -ChunkOverrideEnd $ChunkEndPartSupp     # partsupp
+Invoke-dbgen -GenerateData $Supplier    -ScaleFactor $ScaleFactor -OutputFolder $OutputFolder -Table "s" -TableName "supplier"     -Chunks $ChunksSupplier -ChunkOverrideStart $ChunkStartSupplier -ChunkOverrideEnd $ChunkEndSupplier     # supplier
+
+
+<###### The commands in this section will allow you to monitor the data generation job activity ######>
+
 
 <#
-    # Run this command if you need to pull a list of all the jobs.
+    # Run this command if you need to pull a list of all the jobs. !! Warning - This could take a long time to run if there are a large number of chunks to generate !!
     Clear-Host
     Get-Job
 
@@ -127,9 +150,9 @@ Invoke-dbgen -ScaleFactor $ScaleFactor -Table "s" -TableName "supplier"     -Chu
     Get-Job -Id $JobId | Select-Object Id, Name, PSBeginTime, PSEndTime, @{name="Duration[s]"; expression={$End = if ($_.PSEndTime) {$_.PSEndTime} else {Get-Date};(New-TimeSpan -Start $_.PSBeginTime -End $End).TotalSeconds}}, HasMoreData | Format-Table -AutoSize
 
     # Run this command if you need to pull the output data from a specific job.
-    Get-Job -Id 2 | Receive-Job -Keep
+    Get-Job -Id 0 | Receive-Job -Keep
 
-    # Run this command if you need to pull the output data from all the jobs.
+    # Run this command if you need to pull the output data from all the jobs.  !! Warning - This could take a long time to run if there are a large number of chunks to generate !!
     Get-Job | Receive-Job -Keep
 
     # Run this command to remove all the completed jobs.
