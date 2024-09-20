@@ -36,7 +36,7 @@ BEGIN
 
 	/*************************************   TPCH Query 01   *************************************/
 
-	IF @Query = 'Query 01'
+	IF @Query = 'TPC-H Query 01'
 	select
 		l_returnflag,
 		l_linestatus,
@@ -65,7 +65,7 @@ BEGIN
 
 	/*************************************   TPCH Query 02   *************************************/
 
-	IF @Query = 'Query 02'
+	IF @Query = 'TPC-H Query 02'
 	select top 100
 		s_acctbal,
 		s_name,
@@ -114,7 +114,7 @@ BEGIN
 
 	/*************************************   TPCH Query 03   *************************************/
 
-	IF @Query = 'Query 03'
+	IF @Query = 'TPC-H Query 03'
 	select top 10
 		l_orderkey,
 		sum(l_extendedprice * (1 - l_discount)) as revenue,
@@ -144,7 +144,7 @@ BEGIN
 
 	/*************************************   TPCH Query 04   *************************************/
 
-	IF @Query = 'Query 04'
+	IF @Query = 'TPC-H Query 04'
 	select
 		o_orderpriority,
 		count_big(*) as order_count
@@ -173,7 +173,7 @@ BEGIN
 
 	/*************************************   TPCH Query 05   *************************************/
 
-	IF @Query = 'Query 05'
+	IF @Query = 'TPC-H Query 05'
 	select
 		n_name,
 		sum(l_extendedprice * (1 - l_discount)) as revenue
@@ -205,7 +205,7 @@ BEGIN
 
 	/*************************************   TPCH Query 06   *************************************/	
 
-	IF @Query = 'Query 06'
+	IF @Query = 'TPC-H Query 06'
 	select
 		sum(l_extendedprice * l_discount) as revenue
 	from
@@ -222,7 +222,7 @@ BEGIN
 
 	/*************************************   TPCH Query 07   *************************************/
 
-	IF @Query = 'Query 07'
+	IF @Query = 'TPC-H Query 07'
 	select
 		supp_nation,
 		cust_nation,
@@ -269,7 +269,7 @@ BEGIN
 
 	/*************************************   TPCH Query 08   *************************************/
 
-	IF @Query = 'Query 08'
+	IF @Query = 'TPC-H Query 08'
 	select
 		o_year,
 		sum(case
@@ -314,7 +314,7 @@ BEGIN
 
 	/*************************************   TPCH Query 09   *************************************/
 
-	IF @Query = 'Query 09'
+	IF @Query = 'TPC-H Query 09'
 	select
 		nation,
 		o_year,
@@ -353,7 +353,7 @@ BEGIN
 
 	/*************************************   TPCH Query 10   *************************************/
 
-	IF @Query = 'Query 10'
+	IF @Query = 'TPC-H Query 10'
 	select top 20
 		c_custkey,
 		c_name,
@@ -392,7 +392,7 @@ BEGIN
 
 	/*************************************   TPCH Query 11   *************************************/
 
-	IF @Query = 'Query 11'
+	IF @Query = 'TPC-H Query 11'
 	select
 		ps_partkey,
 		sum(ps_supplycost * ps_availqty) as value
@@ -425,7 +425,7 @@ BEGIN
 
 	/*************************************   TPCH Query 12   *************************************/
 
-	IF @Query = 'Query 12'
+	IF @Query = 'TPC-H Query 12'
 	select
 		l_shipmode,
 		sum(case
@@ -461,7 +461,7 @@ BEGIN
 
 	/*************************************   TPCH Query 13   *************************************/
 
-	IF @Query = 'Query 13'
+	IF @Query = 'TPC-H Query 13'
 	select
 		c_count,
 		count(*) as custdist
@@ -487,7 +487,7 @@ BEGIN
 
 	/*************************************   TPCH Query 14   *************************************/
 
-	IF @Query = 'Query 14'
+	IF @Query = 'TPC-H Query 14'
 	select
 		100.00 * sum(case
 			when p_type like 'PROMO%'
@@ -508,7 +508,7 @@ BEGIN
 
 	/*************************************   TPCH Query 15   *************************************/
 
-	IF @Query = 'Query 15'
+	IF @Query = 'TPC-H Query 15'
 	select
 		s_suppkey,
 		s_name,
@@ -533,7 +533,7 @@ BEGIN
 
 	/*************************************   TPCH Query 16   *************************************/
 
-	IF @Query = 'Query 16'
+	IF @Query = 'TPC-H Query 16'
 	select
 		p_brand,
 		p_type,
@@ -569,7 +569,7 @@ BEGIN
 
 	/*************************************   TPCH Query 17   *************************************/
 
-	IF @Query = 'Query 17'
+	IF @Query = 'TPC-H Query 17'
 	select
 		sum(l_extendedprice) / 7.0 as avg_yearly
 	from
@@ -592,7 +592,7 @@ BEGIN
 
 	/*************************************   TPCH Query 18   *************************************/
 
-	IF @Query = 'Query 18'
+	IF @Query = 'TPC-H Query 18'
 	select top 100
 		c_name,
 		c_custkey,
@@ -630,7 +630,7 @@ BEGIN
 
 	/*************************************   TPCH Query 19   *************************************/
 
-	IF @Query = 'Query 19'
+	IF @Query = 'TPC-H Query 19'
 	select
 		sum(l_extendedprice* (1 - l_discount)) as revenue
 	from
@@ -671,7 +671,7 @@ BEGIN
 
 	/*************************************   TPCH Query 20   *************************************/
 
-	IF @Query = 'Query 20'
+	IF @Query = 'TPC-H Query 20'
 	select
 		s_name,
 		s_address
@@ -716,7 +716,7 @@ BEGIN
 
 	/*************************************   TPCH Query 21   *************************************/	
 
-	IF @Query = 'Query 21'
+	IF @Query = 'TPC-H Query 21'
 	select top 100
 		s_name,
 		count(*) as numwait
@@ -761,7 +761,7 @@ BEGIN
 
 	/*************************************   TPCH Query 22   *************************************/
 
-	IF @Query = 'Query 22'
+	IF @Query = 'TPC-H Query 22'
 	select
 		cntrycode,
 		count(*) as numcust,
