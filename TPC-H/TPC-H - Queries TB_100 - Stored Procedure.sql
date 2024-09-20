@@ -2,7 +2,7 @@ DROP PROCEDURE IF EXISTS dbo.RunQuery
 GO
 
 CREATE PROCEDURE dbo.RunQuery
-	@Query					NVARCHAR(10),
+	@Query					NVARCHAR(20),
 	@Dataset				NVARCHAR(50) 	= 'TPC-H',
 	@DataSize				NVARCHAR(50) 	= 'TB_100',
 	@Seed					NVARCHAR(50) 	= '81310311',
