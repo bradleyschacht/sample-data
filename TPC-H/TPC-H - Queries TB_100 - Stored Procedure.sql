@@ -14,7 +14,7 @@ BEGIN
 	/*************************************   Notes   *************************************/
 	/*
 		John Hoang 8/13/2024
-		This is the TPCH 1TB SF queries modified for Fabric DW (interval, extract, date, substring and rowcount modification)
+		This is the TPCH 100 TB SF queries modified for Fabric DW (interval, extract, date, substring and rowcount modification)
 
 		TPC TPC-H Parameter Substitution (Version 3.0.0 build 0)
 		Using 81310311 as a seed to the RNG

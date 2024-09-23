@@ -4,7 +4,7 @@ GO
 CREATE PROCEDURE dbo.RunQuery
 	@Query					NVARCHAR(20),
 	@Dataset				NVARCHAR(50) 	= 'TPC-H',
-	@DataSize				NVARCHAR(50) 	= 'TB_001',
+	@DataSize				NVARCHAR(50) 	= 'GB_100',
 	@Seed					NVARCHAR(50) 	= '81310311',
 	@AdditionalInformation	NVARCHAR(MAX) 	= '{}',
 	@QueryLog				NVARCHAR(MAX) 	OUTPUT
@@ -14,7 +14,7 @@ BEGIN
 	/*************************************   Notes   *************************************/
 	/*
 		John Hoang 8/13/2024
-		This is the TPCH 1 TB SF queries modified for Fabric DW (interval, extract, date, substring and rowcount modification)
+		This is the TPCH 100 GB SF queries modified for Fabric DW (interval, extract, date, substring and rowcount modification)
 
 		TPC TPC-H Parameter Substitution (Version 3.0.0 build 0)
 		Using 81310311 as a seed to the RNG
@@ -408,7 +408,7 @@ BEGIN
 		ps_partkey having
 			sum(ps_supplycost * ps_availqty) > (
 				select
-					sum(ps_supplycost * ps_availqty) * 0.0000001000
+					sum(ps_supplycost * ps_availqty) * 0.0000010000
 				from
 					partsupp,
 					supplier,
