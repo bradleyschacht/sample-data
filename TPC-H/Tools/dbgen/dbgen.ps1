@@ -1,6 +1,6 @@
 # dbgen parameters.
-$dbgenDirectory     = "C:\TPCH\dbgen"    # Directory where dbgen.exe and dists.dss are stored. This is also the directory where the files will be generated and temporarily stored before being moved to the appropriate table specific subdirectory inside the $OutputDirectory.
-$OutputDirectory    = "C:\TPCH\GB_001"   # Directory where all the generated files should be stored upon completion. This requires a portion of the script that is commented out.
+$dbgenDirectory     = "C:\TPCH\Tools\dbgen" # Directory where dbgen.exe and dists.dss are stored. This is also the directory where the files will be generated and temporarily stored before being moved to the appropriate table specific subdirectory inside the $OutputDirectory.
+$OutputDirectory    = "C:\TPCH\GB_001"      # Directory where all the generated files should be stored upon completion. This requires a portion of the script that is commented out.
 $ScaleFactor        = 1   # Measured in GB.
 $ParallelJobs       = 1   # Number of parallel data generation jobs.
 
