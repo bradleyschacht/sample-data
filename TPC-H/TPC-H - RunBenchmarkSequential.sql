@@ -6,7 +6,7 @@ AS
 BEGIN
 
 DECLARE @Loop			INT = 1
-DECLARE @CustomQueryLog	NVARCHAR(MAX)
+DECLARE @QueryCustomLog	NVARCHAR(MAX)
 
 WHILE @Loop <= 22
 BEGIN
@@ -16,13 +16,13 @@ BEGIN
 	
 	EXEC dbo.RunQuery @Query = @CurrentQuery, @QueryLog = @QueryLog OUTPUT
 
-	SET @CustomQueryLog = (SELECT COALESCE(@CustomQueryLog + ', ', '') + @QueryLog)
+	SET @QueryCustomLog = (SELECT COALESCE(@QueryCustomLog + ', ', '') + @QueryLog)
 
 	SET @Loop = @Loop + 1
 END
 
-SET @CustomQueryLog = CONCAT('[', @CustomQueryLog, ']')
-SELECT @CustomQueryLog AS CustomQueryLog
+SET @QueryCustomLog = CONCAT('[', @QueryCustomLog, ']')
+SELECT @QueryCustomLog AS QueryCustomLog
 
 END
 GO

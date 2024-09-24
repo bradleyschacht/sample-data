@@ -13,7 +13,19 @@ DECLARE
 
 
 SET	@count_customer 	= 150000. 	* @ScaleFactorInGB
-SET	@count_lineitem 	= 6000000. 	* @ScaleFactorInGB
+SET	@count_lineitem 	= CASE @ScaleFactorInGB
+								WHEN 1 THEN 6001215
+								WHEN 10 THEN 59986052
+								WHEN 30 THEN 179998372
+								WHEN 100 THEN 600037902
+								WHEN 300 THEN 1799989091
+								WHEN 1000 THEN 5999989709
+								WHEN 3000 THEN 18000048306
+								WHEN 10000 THEN 59999994267
+								WHEN 30000 THEN 179999978268
+								WHEN 100000 THEN 599999969200
+								ELSE 6000000. 	* @ScaleFactorInGB
+								END
 SET	@count_nation 		= 25
 SET	@count_orders 		= 1500000. 	* @ScaleFactorInGB
 SET	@count_part 		= 200000. 	* @ScaleFactorInGB
