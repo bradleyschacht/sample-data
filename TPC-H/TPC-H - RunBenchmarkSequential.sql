@@ -6,7 +6,7 @@ AS
 BEGIN
 
 DECLARE @Loop			INT = 1
-DECLARE @QueryCustomLog	NVARCHAR(MAX)
+DECLARE @QueryCustomLog	NVARCHAR(MAX) = '[]'
 
 WHILE @Loop <= 22
 BEGIN
@@ -16,12 +16,11 @@ BEGIN
 	
 	EXEC dbo.RunQuery @Query = @CurrentQuery, @QueryLog = @QueryLog OUTPUT
 
-	SET @QueryCustomLog = (SELECT COALESCE(@QueryCustomLog + ', ', '') + @QueryLog)
+	SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON(@QueryLog)
 
 	SET @Loop = @Loop + 1
 END
 
-SET @QueryCustomLog = CONCAT('[', @QueryCustomLog, ']')
 SELECT @QueryCustomLog AS QueryCustomLog
 
 END

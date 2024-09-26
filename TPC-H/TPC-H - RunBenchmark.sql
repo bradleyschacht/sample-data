@@ -6,13 +6,13 @@ AS
 BEGIN
 
 DECLARE @Loop			INT = 1
-DECLARE @QueryCustomLog	NVARCHAR(MAX)
+DECLARE @QueryCustomLog	NVARCHAR(MAX) = '[]'
 
 WHILE @Loop <= 22
 BEGIN
 		
 	DECLARE @QueryLog				VARCHAR(MAX)
-	DECLARE @AdditionalInformation 	VARCHAR(MAX) = '{"QueryOrderType":"Spec", "QueryOrder": ' + CONVERT(VARCHAR(2), @Loop) + '}'
+	DECLARE @AdditionalInformation 	VARCHAR(MAX) = (SELECT 'Spec' AS QueryOrderType, @Loop AS QueryOrder FOR JSON PATH)
 	DECLARE @CurrentQuery 			VARCHAR(20) = 'TPC-H Query ' +
 		CASE 
 			WHEN @Loop = 1  THEN '14'
@@ -41,12 +41,11 @@ BEGIN
 	
 	EXEC dbo.RunQuery @Query = @CurrentQuery, @AdditionalInformation = @AdditionalInformation, @QueryLog = @QueryLog OUTPUT
 
-	SET @QueryCustomLog = (SELECT COALESCE(@QueryCustomLog + ', ', '') + @QueryLog)
+	SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON(@QueryLog)
 
 	SET @Loop = @Loop + 1
 END
 
-SET @QueryCustomLog = CONCAT('[', @QueryCustomLog, ']')
 SELECT @QueryCustomLog AS QueryCustomLog
 
 END

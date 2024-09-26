@@ -1,16 +1,43 @@
 
+DROP PROCEDURE IF EXISTS dbo.RunQuery
+GO
+
+CREATE PROCEDURE dbo.RunQuery
+    @Query                  NVARCHAR(20),
+    @Dataset                NVARCHAR(50)     = 'TPC-DS',
+    @DataSize               NVARCHAR(50)     = 'TB_003',
+    @Seed                   NVARCHAR(50)     = '81310311',
+    @AdditionalInformation  NVARCHAR(MAX)    = NULL,
+    @QueryLog               NVARCHAR(MAX)    OUTPUT
+AS
+BEGIN
+
     /*************************************   Notes   *************************************/
     /*
         Generated on 2024-09-26
-        This is the TPC-DS 1000 GB (TB_001) scale factor queries modified for Fabric DW T-SQL syntax.
+        This is the TPC-DS 3000 GB (TB_003) scale factor queries modified for Fabric DW T-SQL syntax.
 
         TPC-DS Parameter Substitution (Version 3.2.0)
         Using 81310311 as a seed to the RNG
     */
 
 
+    /*************************************   Variables   *************************************/
+    /* Create the variables for runtime. */
+    DECLARE @QueryStartTime    DATETIME2(6)
+    DECLARE @QueryEndTime      DATETIME2(6)
+    DECLARE @SessionID         INT
+
+
+    /*************************************   Query Start   *************************************/
+
+    SET @SessionID         = @@SPID
+    SET @QueryStartTime    = GETDATE()
+
+
     /*************************************   TPCDS Query 01   *************************************/
 
+    IF @Query = 'TPC-DS Query 01'
         with customer_total_return as
         (select sr_customer_sk as ctr_customer_sk
         ,sr_store_sk as ctr_store_sk
@@ -29,7 +56,7 @@
         from customer_total_return ctr2
         where ctr1.ctr_store_sk = ctr2.ctr_store_sk)
         and s_store_sk = ctr1.ctr_store_sk
-        and s_state = 'NE'
+        and s_state = 'IA'
         and ctr1.ctr_customer_sk = c_customer_sk
         order by c_customer_id
         OPTION (LABEL = 'TPC-DS Query 01');
@@ -37,6 +64,7 @@
 
     /*************************************   TPCDS Query 02   *************************************/
 
+    IF @Query = 'TPC-DS Query 02'
         with wscs as
          (select sold_date_sk
                 ,sales_price
@@ -99,6 +127,7 @@
 
     /*************************************   TPCDS Query 03   *************************************/
 
+    IF @Query = 'TPC-DS Query 03'
         select top 100 dt.d_year 
                ,item.i_brand_id brand_id 
                ,item.i_brand brand
@@ -121,6 +150,7 @@
 
     /*************************************   TPCDS Query 04   *************************************/
 
+    IF @Query = 'TPC-DS Query 04'
         with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
@@ -238,6 +268,7 @@
 
     /*************************************   TPCDS Query 05   *************************************/
 
+    IF @Query = 'TPC-DS Query 05'
         with ssr as
          (select s_store_id,
                 sum(sales_price) as sales,
@@ -367,6 +398,7 @@
 
     /*************************************   TPCDS Query 06   *************************************/
 
+    IF @Query = 'TPC-DS Query 06'
         select top 100 a.ca_state state, count(*) cnt
          from customer_address a
              ,customer c
@@ -394,6 +426,7 @@
 
     /*************************************   TPCDS Query 07   *************************************/
 
+    IF @Query = 'TPC-DS Query 07'
         select top 100 i_item_id, 
                 avg(ss_quantity) agg1,
                 avg(ss_list_price) agg2,
@@ -416,6 +449,7 @@
 
     /*************************************   TPCDS Query 08   *************************************/
 
+    IF @Query = 'TPC-DS Query 08'
         select top 100 s_store_name
               ,sum(ss_net_profit)
          from store_sales
@@ -525,49 +559,50 @@
 
     /*************************************   TPCDS Query 09   *************************************/
 
+    IF @Query = 'TPC-DS Query 09'
         select case when (select count(*) 
                           from store_sales 
-                          where ss_quantity between 1 and 20) > 14797487
-                    then (select avg(ss_ext_list_price) 
+                          where ss_quantity between 1 and 20) > 62797487
+                    then (select avg(ss_ext_tax) 
                           from store_sales 
                           where ss_quantity between 1 and 20) 
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 1 and 20) end bucket1 ,
                case when (select count(*)
                           from store_sales
-                          where ss_quantity between 21 and 40) > 17121733
-                    then (select avg(ss_ext_list_price)
+                          where ss_quantity between 21 and 40) > 128508875
+                    then (select avg(ss_ext_tax)
                           from store_sales
                           where ss_quantity between 21 and 40) 
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 21 and 40) end bucket2,
                case when (select count(*)
                           from store_sales
                           where ss_quantity between 41 and 60) > 7142264
-                    then (select avg(ss_ext_list_price)
+                    then (select avg(ss_ext_tax)
                           from store_sales
                           where ss_quantity between 41 and 60)
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 41 and 60) end bucket3,
                case when (select count(*)
                           from store_sales
-                          where ss_quantity between 61 and 80) > 37624992
-                    then (select avg(ss_ext_list_price)
+                          where ss_quantity between 61 and 80) > 27398900
+                    then (select avg(ss_ext_tax)
                           from store_sales
                           where ss_quantity between 61 and 80)
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 61 and 80) end bucket4,
                case when (select count(*)
                           from store_sales
-                          where ss_quantity between 81 and 100) > 416332
-                    then (select avg(ss_ext_list_price)
+                          where ss_quantity between 81 and 100) > 130544679
+                    then (select avg(ss_ext_tax)
                           from store_sales
                           where ss_quantity between 81 and 100)
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 81 and 100) end bucket5
         from reason
@@ -577,6 +612,7 @@
 
     /*************************************   TPCDS Query 10   *************************************/
 
+    IF @Query = 'TPC-DS Query 10'
         select top 100 
           cd_gender,
           cd_marital_status,
@@ -637,6 +673,7 @@
 
     /*************************************   TPCDS Query 11   *************************************/
 
+    IF @Query = 'TPC-DS Query 11'
         with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
@@ -719,6 +756,7 @@
 
     /*************************************   TPCDS Query 12   *************************************/
 
+    IF @Query = 'TPC-DS Query 12'
         select top 100 i_item_id
               ,i_item_desc 
               ,i_category 
@@ -754,6 +792,7 @@
 
     /*************************************   TPCDS Query 13   *************************************/
 
+    IF @Query = 'TPC-DS Query 13'
         select avg(ss_quantity)
                ,avg(ss_ext_sales_price)
                ,avg(ss_ext_wholesale_cost)
@@ -807,6 +846,7 @@
 
     /*************************************   TPCDS Query 14   *************************************/
 
+    IF @Query = 'TPC-DS Query 14'
         with  cross_items as
          (select i_item_sk ss_item_sk
          from item,
@@ -1018,6 +1058,7 @@
 
     /*************************************   TPCDS Query 15   *************************************/
 
+    IF @Query = 'TPC-DS Query 15'
         select top 100 ca_zip
                ,sum(cs_sales_price)
          from catalog_sales
@@ -1039,6 +1080,7 @@
 
     /*************************************   TPCDS Query 16   *************************************/
 
+    IF @Query = 'TPC-DS Query 16'
         select top 100 
            count(distinct cs_order_number) as "order count"
           ,sum(cs_ext_ship_cost) as "total shipping cost"
@@ -1049,14 +1091,14 @@
           ,customer_address
           ,call_center
         where
-            d_date between '2002-3-01' and 
-                   (dateadd(day, + 60, cast('2002-3-01' as date))) /*  (cast('2002-3-01' as date) + 60 days)  */
+            d_date between '2001-3-01' and 
+                   (dateadd(day, + 60, cast('2001-3-01' as date))) /*  (cast('2001-3-01' as date) + 60 days)  */
         and cs1.cs_ship_date_sk = d_date_sk
         and cs1.cs_ship_addr_sk = ca_address_sk
-        and ca_state = 'ID'
+        and ca_state = 'GA'
         and cs1.cs_call_center_sk = cc_call_center_sk
-        and cc_county in ('Kittitas County','Franklin Parish','Daviess County','Barrow County',
-                          'Levy County'
+        and cc_county in ('Jackson County','San Miguel County','Barrow County','Mobile County',
+                          'Fairfield County'
         )
         and exists (select *
                     from catalog_sales cs2
@@ -1071,6 +1113,7 @@
 
     /*************************************   TPCDS Query 17   *************************************/
 
+    IF @Query = 'TPC-DS Query 17'
         select top 100 i_item_id
                ,i_item_desc
                ,s_state
@@ -1117,6 +1160,7 @@
 
     /*************************************   TPCDS Query 18   *************************************/
 
+    IF @Query = 'TPC-DS Query 18'
         select top 100 i_item_id,
                 ca_country,
                 ca_state, 
@@ -1152,6 +1196,7 @@
 
     /*************************************   TPCDS Query 19   *************************************/
 
+    IF @Query = 'TPC-DS Query 19'
         select top 100 i_brand_id brand_id, i_brand brand, i_manufact_id, i_manufact,
          	sum(ss_ext_sales_price) ext_price
          from date_dim, store_sales, item,customer,customer_address,store
@@ -1178,6 +1223,7 @@
 
     /*************************************   TPCDS Query 20   *************************************/
 
+    IF @Query = 'TPC-DS Query 20'
         select top 100 i_item_id
                ,i_item_desc 
                ,i_category 
@@ -1209,6 +1255,7 @@
 
     /*************************************   TPCDS Query 21   *************************************/
 
+    IF @Query = 'TPC-DS Query 21'
         select top 100 *
          from(select w_warehouse_name
                     ,i_item_id
@@ -1240,6 +1287,7 @@
 
     /*************************************   TPCDS Query 22   *************************************/
 
+    IF @Query = 'TPC-DS Query 22'
         select top 100 i_product_name
                      ,i_brand
                      ,i_class
@@ -1261,6 +1309,7 @@
 
     /*************************************   TPCDS Query 23   *************************************/
 
+    IF @Query = 'TPC-DS Query 23'
         with frequent_ss_items as 
         (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt /* (select substr(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt */
           from store_sales
@@ -1369,6 +1418,7 @@
 
     /*************************************   TPCDS Query 24   *************************************/
 
+    IF @Query = 'TPC-DS Query 24'
         with ssales as
         (select c_last_name
               ,c_first_name
@@ -1477,6 +1527,7 @@
 
     /*************************************   TPCDS Query 25   *************************************/
 
+    IF @Query = 'TPC-DS Query 25'
         select top 100 
          i_item_id
          ,i_item_desc
@@ -1526,6 +1577,7 @@
 
     /*************************************   TPCDS Query 26   *************************************/
 
+    IF @Query = 'TPC-DS Query 26'
         select top 100 i_item_id, 
                 avg(cs_quantity) agg1,
                 avg(cs_list_price) agg2,
@@ -1548,6 +1600,7 @@
 
     /*************************************   TPCDS Query 27   *************************************/
 
+    IF @Query = 'TPC-DS Query 27'
         select top 100 i_item_id,
                 s_state, grouping(s_state) g_state,
                 avg(ss_quantity) agg1,
@@ -1559,11 +1612,11 @@
                ss_item_sk = i_item_sk and
                ss_store_sk = s_store_sk and
                ss_cdemo_sk = cd_demo_sk and
-               cd_gender = 'F' and
-               cd_marital_status = 'S' and
-               cd_education_status = '4 yr Degree' and
+               cd_gender = 'M' and
+               cd_marital_status = 'U' and
+               cd_education_status = 'Advanced Degree' and
                d_year = 2002 and
-               s_state in ('WA','LA', 'MO', 'GA', 'FL', 'MI')
+               s_state in ('MI','IL', 'MN', 'LA', 'MO', 'FL')
          group by rollup (i_item_id, s_state)
          order by i_item_id
                  ,s_state
@@ -1572,6 +1625,7 @@
 
     /*************************************   TPCDS Query 28   *************************************/
 
+    IF @Query = 'TPC-DS Query 28'
         select top 100 *
         from (select avg(ss_list_price) B1_LP
                     ,count(ss_list_price) B1_CNT
@@ -1626,6 +1680,7 @@
 
     /*************************************   TPCDS Query 29   *************************************/
 
+    IF @Query = 'TPC-DS Query 29'
         select top 100  
              i_item_id
             ,i_item_desc
@@ -1674,6 +1729,7 @@
 
     /*************************************   TPCDS Query 30   *************************************/
 
+    IF @Query = 'TPC-DS Query 30'
         with customer_total_return as
          (select wr_returning_customer_sk as ctr_customer_sk
                 ,ca_state as ctr_state, 
@@ -1706,6 +1762,7 @@
 
     /*************************************   TPCDS Query 31   *************************************/
 
+    IF @Query = 'TPC-DS Query 31'
         with ss as
          (select ca_county,d_qoy, d_year,sum(ss_ext_sales_price) as store_sales
          from store_sales,date_dim,customer_address
@@ -1760,6 +1817,7 @@
 
     /*************************************   TPCDS Query 32   *************************************/
 
+    IF @Query = 'TPC-DS Query 32'
         select top 100 sum(cs_ext_discount_amt)  as "excess discount amount" 
         from 
            catalog_sales 
@@ -1789,6 +1847,7 @@
 
     /*************************************   TPCDS Query 33   *************************************/
 
+    IF @Query = 'TPC-DS Query 33'
         with ss as (
          select
                   i_manufact_id,sum(ss_ext_sales_price) total_sales
@@ -1865,6 +1924,7 @@
 
     /*************************************   TPCDS Query 34   *************************************/
 
+    IF @Query = 'TPC-DS Query 34'
         select c_last_name
                ,c_first_name
                ,c_salutation
@@ -1879,16 +1939,16 @@
             and store_sales.ss_store_sk = store.s_store_sk  
             and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk
             and (date_dim.d_dom between 1 and 3 or date_dim.d_dom between 25 and 28)
-            and (household_demographics.hd_buy_potential = '1001-5000' or
-                 household_demographics.hd_buy_potential = '5001-10000')
+            and (household_demographics.hd_buy_potential = '>10000' or
+                 household_demographics.hd_buy_potential = 'Unknown')
             and household_demographics.hd_vehicle_count > 0
             and (case when household_demographics.hd_vehicle_count > 0 
         	then household_demographics.hd_dep_count/ household_demographics.hd_vehicle_count 
         	else null 
         	end)  > 1.2
-            and date_dim.d_year in (2000,2000+1,2000+2)
-            and store.s_county in ('Daviess County','Oglethorpe County','Williamson County','Levy County',
-                                   'Jackson County','Marshall County','Mesa County','Richland County')
+            and date_dim.d_year in (1998,1998+1,1998+2)
+            and store.s_county in ('Essex County','Contra Costa County','Terry County','Huron County',
+                                   'Fairfield County','Williamson County','Hubbard County','Saginaw County')
             group by ss_ticket_number,ss_customer_sk) dn,customer
             where ss_customer_sk = c_customer_sk
               and cnt between 15 and 20
@@ -1898,6 +1958,7 @@
 
     /*************************************   TPCDS Query 35   *************************************/
 
+    IF @Query = 'TPC-DS Query 35'
         select top 100  
           ca_state,
           cd_gender,
@@ -1957,6 +2018,7 @@
 
     /*************************************   TPCDS Query 36   *************************************/
 
+    IF @Query = 'TPC-DS Query 36'
         select top 100 
             sum(ss_net_profit)/sum(ss_ext_sales_price) as gross_margin
            ,i_category
@@ -1976,8 +2038,8 @@
          and d1.d_date_sk = ss_sold_date_sk
          and i_item_sk  = ss_item_sk 
          and s_store_sk  = ss_store_sk
-         and s_state in ('WA','LA','MO','GA',
-                         'FL','MI','NY','SD')
+         and s_state in ('MI','IL','MN','LA',
+                         'MO','FL','AL','TX')
          group by rollup(i_category,i_class)
          order by
            lochierarchy desc
@@ -1988,6 +2050,7 @@
 
     /*************************************   TPCDS Query 37   *************************************/
 
+    IF @Query = 'TPC-DS Query 37'
         select top 100 i_item_id
                ,i_item_desc
                ,i_current_price
@@ -2006,6 +2069,7 @@
 
     /*************************************   TPCDS Query 38   *************************************/
 
+    IF @Query = 'TPC-DS Query 38'
         select top 100 count(*) from (
             select distinct c_last_name, c_first_name, d_date
             from store_sales, date_dim, customer
@@ -2030,6 +2094,7 @@
 
     /*************************************   TPCDS Query 39   *************************************/
 
+    IF @Query = 'TPC-DS Query 39'
         with inv as
         (select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy
                ,stdev,mean, case mean when 0 then null else stdev/mean end cov
@@ -2085,6 +2150,7 @@
 
     /*************************************   TPCDS Query 40   *************************************/
 
+    IF @Query = 'TPC-DS Query 40'
         select top 100 
            w_state
           ,i_item_id
@@ -2114,6 +2180,7 @@
 
     /*************************************   TPCDS Query 41   *************************************/
 
+    IF @Query = 'TPC-DS Query 41'
         select distinct top 100 (i_product_name) /* select top 100 distinct(i_product_name) */
          from item i1
          where i_manufact_id between 682 and 682+40 
@@ -2167,6 +2234,7 @@
 
     /*************************************   TPCDS Query 42   *************************************/
 
+    IF @Query = 'TPC-DS Query 42'
         select top 100 dt.d_year
          	,item.i_category_id
          	,item.i_category
@@ -2190,6 +2258,7 @@
 
     /*************************************   TPCDS Query 43   *************************************/
 
+    IF @Query = 'TPC-DS Query 43'
         select top 100 s_store_name, s_store_id,
                 sum(case when (d_day_name='Sunday') then ss_sales_price else null end) sun_sales,
                 sum(case when (d_day_name='Monday') then ss_sales_price else null end) mon_sales,
@@ -2210,16 +2279,17 @@
 
     /*************************************   TPCDS Query 44   *************************************/
 
+    IF @Query = 'TPC-DS Query 44'
         select top 100 asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing
         from(select *
              from (select item_sk,rank() over (order by rank_col asc) rnk
                    from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col 
                          from store_sales ss1
-                         where ss_store_sk = 16
+                         where ss_store_sk = 661
                          group by ss_item_sk
                          having avg(ss_net_profit) > 0.9*(select avg(ss_net_profit) rank_col
                                                           from store_sales
-                                                          where ss_store_sk = 16
+                                                          where ss_store_sk = 661
                                                             and ss_addr_sk is null
                                                           group by ss_store_sk))V1)V11
              where rnk  < 11) asceding,
@@ -2227,11 +2297,11 @@
              from (select item_sk,rank() over (order by rank_col desc) rnk
                    from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col
                          from store_sales ss1
-                         where ss_store_sk = 16
+                         where ss_store_sk = 661
                          group by ss_item_sk
                          having avg(ss_net_profit) > 0.9*(select avg(ss_net_profit) rank_col
                                                           from store_sales
-                                                          where ss_store_sk = 16
+                                                          where ss_store_sk = 661
                                                             and ss_addr_sk is null
                                                           group by ss_store_sk))V2)V21
              where rnk  < 11) descending,
@@ -2246,6 +2316,7 @@
 
     /*************************************   TPCDS Query 45   *************************************/
 
+    IF @Query = 'TPC-DS Query 45'
         select top 100 ca_zip, ca_city, sum(ws_sales_price)
          from web_sales, customer, customer_address, date_dim, item
          where ws_bill_customer_sk = c_customer_sk
@@ -2267,6 +2338,7 @@
 
     /*************************************   TPCDS Query 46   *************************************/
 
+    IF @Query = 'TPC-DS Query 46'
         select top 100 c_last_name
                ,c_first_name
                ,ca_city
@@ -2284,11 +2356,11 @@
             and store_sales.ss_store_sk = store.s_store_sk  
             and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk
             and store_sales.ss_addr_sk = customer_address.ca_address_sk
-            and (household_demographics.hd_dep_count = 1 or
-                 household_demographics.hd_vehicle_count= 0)
+            and (household_demographics.hd_dep_count = 9 or
+                 household_demographics.hd_vehicle_count= 3)
             and date_dim.d_dow in (6,0)
             and date_dim.d_year in (2000,2000+1,2000+2) 
-            and store.s_city in ('Midway','Franklin','Oakdale','Walnut Grove','Harmony') 
+            and store.s_city in ('Hamilton','Harmony','Lincoln','Union','Valley View') 
             group by ss_ticket_number,ss_customer_sk,ss_addr_sk,ca_city) dn,customer,customer_address current_addr
             where ss_customer_sk = c_customer_sk
               and customer.c_current_addr_sk = current_addr.ca_address_sk
@@ -2303,6 +2375,7 @@
 
     /*************************************   TPCDS Query 47   *************************************/
 
+    IF @Query = 'TPC-DS Query 47'
         with v1 as(
          select i_category, i_brand,
                 s_store_name, s_company_name,
@@ -2355,6 +2428,7 @@
 
     /*************************************   TPCDS Query 48   *************************************/
 
+    IF @Query = 'TPC-DS Query 48'
         select sum (ss_quantity)
          from store_sales, store, customer_demographics, customer_address, date_dim
          where s_store_sk = ss_store_sk
@@ -2423,6 +2497,7 @@
 
     /*************************************   TPCDS Query 49   *************************************/
 
+    IF @Query = 'TPC-DS Query 49'
         select top 100 channel, item, return_ratio, return_rank, currency_rank from
          (select
          'web' as channel
@@ -2553,6 +2628,7 @@
 
     /*************************************   TPCDS Query 50   *************************************/
 
+    IF @Query = 'TPC-DS Query 50'
         select top 100 
            s_store_name
           ,s_company_id
@@ -2613,6 +2689,7 @@
 
     /*************************************   TPCDS Query 51   *************************************/
 
+    IF @Query = 'TPC-DS Query 51'
         WITH web_v1 as (
         select
           ws_item_sk item_sk, d_date,
@@ -2659,6 +2736,7 @@
 
     /*************************************   TPCDS Query 52   *************************************/
 
+    IF @Query = 'TPC-DS Query 52'
         select top 100 dt.d_year
          	,item.i_brand_id brand_id
          	,item.i_brand brand
@@ -2682,6 +2760,7 @@
 
     /*************************************   TPCDS Query 53   *************************************/
 
+    IF @Query = 'TPC-DS Query 53'
         select top 100 * from 
         (select i_manufact_id,
         sum(ss_sales_price) sum_sales,
@@ -2711,6 +2790,7 @@
 
     /*************************************   TPCDS Query 54   *************************************/
 
+    IF @Query = 'TPC-DS Query 54'
         with my_customers as (
          select distinct c_customer_sk
                 , c_current_addr_sk
@@ -2768,6 +2848,7 @@
 
     /*************************************   TPCDS Query 55   *************************************/
 
+    IF @Query = 'TPC-DS Query 55'
         select top 100 i_brand_id brand_id, i_brand brand,
          	sum(ss_ext_sales_price) ext_price
          from date_dim, store_sales, item
@@ -2783,6 +2864,7 @@
 
     /*************************************   TPCDS Query 56   *************************************/
 
+    IF @Query = 'TPC-DS Query 56'
         with ss as (
          select i_item_id,sum(ss_ext_sales_price) total_sales
          from
@@ -2853,6 +2935,7 @@
 
     /*************************************   TPCDS Query 57   *************************************/
 
+    IF @Query = 'TPC-DS Query 57'
         with v1 as(
          select i_category, i_brand,
                 cc_name,
@@ -2902,6 +2985,7 @@
 
     /*************************************   TPCDS Query 58   *************************************/
 
+    IF @Query = 'TPC-DS Query 58'
         with ss_items as
          (select i_item_id item_id
                 ,sum(ss_ext_sales_price) ss_item_rev 
@@ -2968,6 +3052,7 @@
 
     /*************************************   TPCDS Query 59   *************************************/
 
+    IF @Query = 'TPC-DS Query 59'
         with wss as 
          (select d_week_seq,
                 ss_store_sk,
@@ -3013,6 +3098,7 @@
 
     /*************************************   TPCDS Query 60   *************************************/
 
+    IF @Query = 'TPC-DS Query 60'
         with ss as (
          select
                   i_item_id,sum(ss_ext_sales_price) total_sales
@@ -3092,6 +3178,7 @@
 
     /*************************************   TPCDS Query 61   *************************************/
 
+    IF @Query = 'TPC-DS Query 61'
         select top 100 promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100
         from
           (select sum(ss_ext_sales_price) promotions
@@ -3137,6 +3224,7 @@
 
     /*************************************   TPCDS Query 62   *************************************/
 
+    IF @Query = 'TPC-DS Query 62'
         select top 100 
         substring(w_warehouse_name,1,20) /* substr(w_warehouse_name,1,20) */
           ,sm_type
@@ -3173,6 +3261,7 @@
 
     /*************************************   TPCDS Query 63   *************************************/
 
+    IF @Query = 'TPC-DS Query 63'
         select top 100 * 
         from (select i_manager_id
                      ,sum(ss_sales_price) sum_sales
@@ -3203,6 +3292,7 @@
 
     /*************************************   TPCDS Query 64   *************************************/
 
+    IF @Query = 'TPC-DS Query 64'
         with cs_ui as
          (select cs_item_sk
                 ,sum(cs_ext_list_price) as sale,sum(cr_refunded_cash+cr_reversed_charge+cr_store_credit) as refund
@@ -3326,6 +3416,7 @@
 
     /*************************************   TPCDS Query 65   *************************************/
 
+    IF @Query = 'TPC-DS Query 65'
         select top 100
         	s_store_name,
         	i_item_desc,
@@ -3356,6 +3447,7 @@
 
     /*************************************   TPCDS Query 66   *************************************/
 
+    IF @Query = 'TPC-DS Query 66'
         select top 100  
                  w_warehouse_name
          	,w_warehouse_sq_ft
@@ -3577,6 +3669,7 @@
 
     /*************************************   TPCDS Query 67   *************************************/
 
+    IF @Query = 'TPC-DS Query 67'
         select top 100 *
         from (select i_category
                     ,i_class
@@ -3622,6 +3715,7 @@
 
     /*************************************   TPCDS Query 68   *************************************/
 
+    IF @Query = 'TPC-DS Query 68'
         select top 100 c_last_name
                ,c_first_name
                ,ca_city
@@ -3646,10 +3740,10 @@
                 and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk
                 and store_sales.ss_addr_sk = customer_address.ca_address_sk
                 and date_dim.d_dom between 1 and 2 
-                and (household_demographics.hd_dep_count = 1 or
-                     household_demographics.hd_vehicle_count= 0)
+                and (household_demographics.hd_dep_count = 9 or
+                     household_demographics.hd_vehicle_count= 3)
                 and date_dim.d_year in (2000,2000+1,2000+2)
-                and store.s_city in ('Midway','Franklin')
+                and store.s_city in ('Hamilton','Harmony')
                group by ss_ticket_number
                        ,ss_customer_sk
                        ,ss_addr_sk,ca_city) dn
@@ -3665,6 +3759,7 @@
 
     /*************************************   TPCDS Query 69   *************************************/
 
+    IF @Query = 'TPC-DS Query 69'
         select top 100 
           cd_gender,
           cd_marital_status,
@@ -3713,6 +3808,7 @@
 
     /*************************************   TPCDS Query 70   *************************************/
 
+    IF @Query = 'TPC-DS Query 70'
         select top 100 
             sum(ss_net_profit) as total_sum
            ,s_state
@@ -3752,6 +3848,7 @@
 
     /*************************************   TPCDS Query 71   *************************************/
 
+    IF @Query = 'TPC-DS Query 71'
         select i_brand_id brand_id, i_brand brand,t_hour,t_minute,
          	sum(ext_price) ext_price
          from item, (select ws_ext_sales_price as ext_price, 
@@ -3793,6 +3890,7 @@
 
     /*************************************   TPCDS Query 72   *************************************/
 
+    IF @Query = 'TPC-DS Query 72'
         select top 100 i_item_desc
               ,w_warehouse_name
               ,d1.d_week_seq
@@ -3823,6 +3921,7 @@
 
     /*************************************   TPCDS Query 73   *************************************/
 
+    IF @Query = 'TPC-DS Query 73'
         select c_last_name
                ,c_first_name
                ,c_salutation
@@ -3837,13 +3936,13 @@
             and store_sales.ss_store_sk = store.s_store_sk  
             and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk
             and date_dim.d_dom between 1 and 2 
-            and (household_demographics.hd_buy_potential = '1001-5000' or
-                 household_demographics.hd_buy_potential = '5001-10000')
+            and (household_demographics.hd_buy_potential = '>10000' or
+                 household_demographics.hd_buy_potential = 'Unknown')
             and household_demographics.hd_vehicle_count > 0
             and case when household_demographics.hd_vehicle_count > 0 then 
                      household_demographics.hd_dep_count/ household_demographics.hd_vehicle_count else null end > 1
-            and date_dim.d_year in (2000,2000+1,2000+2)
-            and store.s_county in ('Daviess County','Oglethorpe County','Williamson County','Levy County')
+            and date_dim.d_year in (1998,1998+1,1998+2)
+            and store.s_county in ('Essex County','Contra Costa County','Terry County','Huron County')
             group by ss_ticket_number,ss_customer_sk) dj,customer
             where ss_customer_sk = c_customer_sk
               and cnt between 1 and 5
@@ -3853,6 +3952,7 @@
 
     /*************************************   TPCDS Query 74   *************************************/
 
+    IF @Query = 'TPC-DS Query 74'
         with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
@@ -3915,6 +4015,7 @@
 
     /*************************************   TPCDS Query 75   *************************************/
 
+    IF @Query = 'TPC-DS Query 75'
         WITH all_sales AS (
          SELECT d_year
                ,i_brand_id
@@ -3986,6 +4087,7 @@
 
     /*************************************   TPCDS Query 76   *************************************/
 
+    IF @Query = 'TPC-DS Query 76'
         select top 100 channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (
                 SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price
                  FROM store_sales, item, date_dim
@@ -4011,6 +4113,7 @@
 
     /*************************************   TPCDS Query 77   *************************************/
 
+    IF @Query = 'TPC-DS Query 77'
         with ss as
          (select s_store_sk,
                  sum(ss_ext_sales_price) as sales,
@@ -4120,6 +4223,7 @@
 
     /*************************************   TPCDS Query 78   *************************************/
 
+    IF @Query = 'TPC-DS Query 78'
         with ws as
           (select d_year AS ws_sold_year, ws_item_sk,
             ws_bill_customer_sk ws_customer_sk,
@@ -4179,6 +4283,7 @@
 
     /*************************************   TPCDS Query 79   *************************************/
 
+    IF @Query = 'TPC-DS Query 79'
         select top 100
         c_last_name,c_first_name,substring(s_city,1,30),ss_ticket_number,amt,profit /* c_last_name,c_first_name,substr(s_city,1,30),ss_ticket_number,amt,profit */
           from
@@ -4203,6 +4308,7 @@
 
     /*************************************   TPCDS Query 80   *************************************/
 
+    IF @Query = 'TPC-DS Query 80'
         with ssr as
          (select  s_store_id as store_id,
                   sum(ss_ext_sales_price) as sales,
@@ -4300,6 +4406,7 @@
 
     /*************************************   TPCDS Query 81   *************************************/
 
+    IF @Query = 'TPC-DS Query 81'
         with customer_total_return as
          (select cr_returning_customer_sk as ctr_customer_sk
                 ,ca_state as ctr_state, 
@@ -4332,6 +4439,7 @@
 
     /*************************************   TPCDS Query 82   *************************************/
 
+    IF @Query = 'TPC-DS Query 82'
         select top 100 i_item_id
                ,i_item_desc
                ,i_current_price
@@ -4350,6 +4458,7 @@
 
     /*************************************   TPCDS Query 83   *************************************/
 
+    IF @Query = 'TPC-DS Query 83'
         with sr_items as
          (select i_item_id item_id,
                 sum(sr_return_quantity) sr_item_qty
@@ -4418,6 +4527,7 @@
 
     /*************************************   TPCDS Query 84   *************************************/
 
+    IF @Query = 'TPC-DS Query 84'
         select top 100 c_customer_id as customer_id
                , coalesce(c_last_name,'')  +  ', '  +  coalesce(c_first_name,'') as customername /*  , coalesce(c_last_name,'') || ', ' || coalesce(c_first_name,'') as customername  */
          from customer
@@ -4440,6 +4550,7 @@
 
     /*************************************   TPCDS Query 85   *************************************/
 
+    IF @Query = 'TPC-DS Query 85'
         select top 100 substring(r_reason_desc,1,20) /* select top 100 substr(r_reason_desc,1,20) */
                ,avg(ws_quantity)
                ,avg(wr_refunded_cash)
@@ -4525,6 +4636,7 @@
 
     /*************************************   TPCDS Query 86   *************************************/
 
+    IF @Query = 'TPC-DS Query 86'
         select top 100  
             sum(ws_net_paid) as total_sum
            ,i_category
@@ -4552,6 +4664,7 @@
 
     /*************************************   TPCDS Query 87   *************************************/
 
+    IF @Query = 'TPC-DS Query 87'
         select count(*) 
         from ((select distinct c_last_name, c_first_name, d_date
                from store_sales, date_dim, customer
@@ -4576,6 +4689,7 @@
 
     /*************************************   TPCDS Query 88   *************************************/
 
+    IF @Query = 'TPC-DS Query 88'
         select  *
         from
          (select count(*) h8_30_to_9
@@ -4671,6 +4785,7 @@
 
     /*************************************   TPCDS Query 89   *************************************/
 
+    IF @Query = 'TPC-DS Query 89'
         select top 100 *
         from(
         select i_category, i_class, i_brand,
@@ -4700,6 +4815,7 @@
 
     /*************************************   TPCDS Query 90   *************************************/
 
+    IF @Query = 'TPC-DS Query 90'
         select top 100 cast(amc as decimal(15,4))/cast(pmc as decimal(15,4)) am_pm_ratio
          from ( select count(*) amc
                from web_sales, household_demographics , time_dim, web_page
@@ -4723,6 +4839,7 @@
 
     /*************************************   TPCDS Query 91   *************************************/
 
+    IF @Query = 'TPC-DS Query 91'
         select  
                 cc_call_center_id Call_Center,
                 cc_name Call_Center_Name,
@@ -4756,6 +4873,7 @@ order by sum(cr_net_loss) desc
 
     /*************************************   TPCDS Query 92   *************************************/
 
+    IF @Query = 'TPC-DS Query 92'
         select top 100 
            sum(ws_ext_discount_amt)  as "Excess Discount Amount" 
         from 
@@ -4787,6 +4905,7 @@ order by sum(cr_net_loss) desc
 
     /*************************************   TPCDS Query 93   *************************************/
 
+    IF @Query = 'TPC-DS Query 93'
         select top 100 ss_customer_sk
                     ,sum(act_sales) sumsales
               from (select ss_item_sk
@@ -4806,6 +4925,7 @@ order by sum(cr_net_loss) desc
 
     /*************************************   TPCDS Query 94   *************************************/
 
+    IF @Query = 'TPC-DS Query 94'
         select top 100 
            count(distinct ws_order_number) as "order count"
           ,sum(ws_ext_ship_cost) as "total shipping cost"
@@ -4836,6 +4956,7 @@ order by sum(cr_net_loss) desc
 
     /*************************************   TPCDS Query 95   *************************************/
 
+    IF @Query = 'TPC-DS Query 95'
         with ws_wh as
         (select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2
          from web_sales ws1,web_sales ws2
@@ -4869,6 +4990,7 @@ order by sum(cr_net_loss) desc
 
     /*************************************   TPCDS Query 96   *************************************/
 
+    IF @Query = 'TPC-DS Query 96'
         select top 100 count(*) 
         from store_sales
             ,household_demographics 
@@ -4886,6 +5008,7 @@ order by sum(cr_net_loss) desc
 
     /*************************************   TPCDS Query 97   *************************************/
 
+    IF @Query = 'TPC-DS Query 97'
         with ssci as (
         select ss_customer_sk customer_sk
               ,ss_item_sk item_sk
@@ -4912,6 +5035,7 @@ order by sum(cr_net_loss) desc
 
     /*************************************   TPCDS Query 98   *************************************/
 
+    IF @Query = 'TPC-DS Query 98'
         select i_item_id
               ,i_item_desc 
               ,i_category 
@@ -4947,6 +5071,7 @@ order by sum(cr_net_loss) desc
 
     /*************************************   TPCDS Query 99   *************************************/
 
+    IF @Query = 'TPC-DS Query 99'
         select top 100 
         substring(w_warehouse_name,1,20) /* substr(w_warehouse_name,1,20) */
           ,sm_type
@@ -4981,3 +5106,41 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 99');
 
 
+    /*************************************   Query End   *************************************/
+
+    SET @QueryEndTime = GETDATE()
+
+    SET @QueryLog = (SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, @Query AS Query, @QueryStartTime AS QueryStartTime, @QueryEndTime AS QueryEndTime FOR JSON PATH)
+END
+GO
+
+
+
+        DROP PROCEDURE IF EXISTS dbo.RunBenchmarkSequential
+        GO
+
+        CREATE PROCEDURE dbo.RunBenchmarkSequential
+        AS
+        BEGIN
+
+        DECLARE @Loop			INT = 1
+        DECLARE @QueryCustomLog	NVARCHAR(MAX) = '[]'
+
+        WHILE @Loop <= 22
+        BEGIN
+                
+            DECLARE @QueryLog		VARCHAR(MAX)
+            DECLARE @CurrentQuery 	VARCHAR(20) = 'TPC-H Query ' + RIGHT('00' + CONVERT(VARCHAR(2), @Loop) , 2)
+            
+            EXEC dbo.RunQuery @Query = @CurrentQuery, @QueryLog = @QueryLog OUTPUT
+
+            SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON(@QueryLog)
+
+            SET @Loop = @Loop + 1
+        END
+
+        SELECT @QueryCustomLog AS QueryCustomLog
+
+        END
+        GO
+        

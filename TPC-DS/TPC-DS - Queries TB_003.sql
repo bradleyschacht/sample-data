@@ -2,7 +2,7 @@
     /*************************************   Notes   *************************************/
     /*
         Generated on 2024-09-26
-        This is the TPC-DS 1000 GB (TB_001) scale factor queries modified for Fabric DW T-SQL syntax.
+        This is the TPC-DS 3000 GB (TB_003) scale factor queries modified for Fabric DW T-SQL syntax.
 
         TPC-DS Parameter Substitution (Version 3.2.0)
         Using 81310311 as a seed to the RNG
@@ -29,7 +29,7 @@
         from customer_total_return ctr2
         where ctr1.ctr_store_sk = ctr2.ctr_store_sk)
         and s_store_sk = ctr1.ctr_store_sk
-        and s_state = 'NE'
+        and s_state = 'IA'
         and ctr1.ctr_customer_sk = c_customer_sk
         order by c_customer_id
         OPTION (LABEL = 'TPC-DS Query 01');
@@ -527,47 +527,47 @@
 
         select case when (select count(*) 
                           from store_sales 
-                          where ss_quantity between 1 and 20) > 14797487
-                    then (select avg(ss_ext_list_price) 
+                          where ss_quantity between 1 and 20) > 62797487
+                    then (select avg(ss_ext_tax) 
                           from store_sales 
                           where ss_quantity between 1 and 20) 
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 1 and 20) end bucket1 ,
                case when (select count(*)
                           from store_sales
-                          where ss_quantity between 21 and 40) > 17121733
-                    then (select avg(ss_ext_list_price)
+                          where ss_quantity between 21 and 40) > 128508875
+                    then (select avg(ss_ext_tax)
                           from store_sales
                           where ss_quantity between 21 and 40) 
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 21 and 40) end bucket2,
                case when (select count(*)
                           from store_sales
                           where ss_quantity between 41 and 60) > 7142264
-                    then (select avg(ss_ext_list_price)
+                    then (select avg(ss_ext_tax)
                           from store_sales
                           where ss_quantity between 41 and 60)
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 41 and 60) end bucket3,
                case when (select count(*)
                           from store_sales
-                          where ss_quantity between 61 and 80) > 37624992
-                    then (select avg(ss_ext_list_price)
+                          where ss_quantity between 61 and 80) > 27398900
+                    then (select avg(ss_ext_tax)
                           from store_sales
                           where ss_quantity between 61 and 80)
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 61 and 80) end bucket4,
                case when (select count(*)
                           from store_sales
-                          where ss_quantity between 81 and 100) > 416332
-                    then (select avg(ss_ext_list_price)
+                          where ss_quantity between 81 and 100) > 130544679
+                    then (select avg(ss_ext_tax)
                           from store_sales
                           where ss_quantity between 81 and 100)
-                    else (select avg(ss_net_profit)
+                    else (select avg(ss_net_paid)
                           from store_sales
                           where ss_quantity between 81 and 100) end bucket5
         from reason
@@ -1049,14 +1049,14 @@
           ,customer_address
           ,call_center
         where
-            d_date between '2002-3-01' and 
-                   (dateadd(day, + 60, cast('2002-3-01' as date))) /*  (cast('2002-3-01' as date) + 60 days)  */
+            d_date between '2001-3-01' and 
+                   (dateadd(day, + 60, cast('2001-3-01' as date))) /*  (cast('2001-3-01' as date) + 60 days)  */
         and cs1.cs_ship_date_sk = d_date_sk
         and cs1.cs_ship_addr_sk = ca_address_sk
-        and ca_state = 'ID'
+        and ca_state = 'GA'
         and cs1.cs_call_center_sk = cc_call_center_sk
-        and cc_county in ('Kittitas County','Franklin Parish','Daviess County','Barrow County',
-                          'Levy County'
+        and cc_county in ('Jackson County','San Miguel County','Barrow County','Mobile County',
+                          'Fairfield County'
         )
         and exists (select *
                     from catalog_sales cs2
@@ -1559,11 +1559,11 @@
                ss_item_sk = i_item_sk and
                ss_store_sk = s_store_sk and
                ss_cdemo_sk = cd_demo_sk and
-               cd_gender = 'F' and
-               cd_marital_status = 'S' and
-               cd_education_status = '4 yr Degree' and
+               cd_gender = 'M' and
+               cd_marital_status = 'U' and
+               cd_education_status = 'Advanced Degree' and
                d_year = 2002 and
-               s_state in ('WA','LA', 'MO', 'GA', 'FL', 'MI')
+               s_state in ('MI','IL', 'MN', 'LA', 'MO', 'FL')
          group by rollup (i_item_id, s_state)
          order by i_item_id
                  ,s_state
@@ -1879,16 +1879,16 @@
             and store_sales.ss_store_sk = store.s_store_sk  
             and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk
             and (date_dim.d_dom between 1 and 3 or date_dim.d_dom between 25 and 28)
-            and (household_demographics.hd_buy_potential = '1001-5000' or
-                 household_demographics.hd_buy_potential = '5001-10000')
+            and (household_demographics.hd_buy_potential = '>10000' or
+                 household_demographics.hd_buy_potential = 'Unknown')
             and household_demographics.hd_vehicle_count > 0
             and (case when household_demographics.hd_vehicle_count > 0 
         	then household_demographics.hd_dep_count/ household_demographics.hd_vehicle_count 
         	else null 
         	end)  > 1.2
-            and date_dim.d_year in (2000,2000+1,2000+2)
-            and store.s_county in ('Daviess County','Oglethorpe County','Williamson County','Levy County',
-                                   'Jackson County','Marshall County','Mesa County','Richland County')
+            and date_dim.d_year in (1998,1998+1,1998+2)
+            and store.s_county in ('Essex County','Contra Costa County','Terry County','Huron County',
+                                   'Fairfield County','Williamson County','Hubbard County','Saginaw County')
             group by ss_ticket_number,ss_customer_sk) dn,customer
             where ss_customer_sk = c_customer_sk
               and cnt between 15 and 20
@@ -1976,8 +1976,8 @@
          and d1.d_date_sk = ss_sold_date_sk
          and i_item_sk  = ss_item_sk 
          and s_store_sk  = ss_store_sk
-         and s_state in ('WA','LA','MO','GA',
-                         'FL','MI','NY','SD')
+         and s_state in ('MI','IL','MN','LA',
+                         'MO','FL','AL','TX')
          group by rollup(i_category,i_class)
          order by
            lochierarchy desc
@@ -2215,11 +2215,11 @@
              from (select item_sk,rank() over (order by rank_col asc) rnk
                    from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col 
                          from store_sales ss1
-                         where ss_store_sk = 16
+                         where ss_store_sk = 661
                          group by ss_item_sk
                          having avg(ss_net_profit) > 0.9*(select avg(ss_net_profit) rank_col
                                                           from store_sales
-                                                          where ss_store_sk = 16
+                                                          where ss_store_sk = 661
                                                             and ss_addr_sk is null
                                                           group by ss_store_sk))V1)V11
              where rnk  < 11) asceding,
@@ -2227,11 +2227,11 @@
              from (select item_sk,rank() over (order by rank_col desc) rnk
                    from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col
                          from store_sales ss1
-                         where ss_store_sk = 16
+                         where ss_store_sk = 661
                          group by ss_item_sk
                          having avg(ss_net_profit) > 0.9*(select avg(ss_net_profit) rank_col
                                                           from store_sales
-                                                          where ss_store_sk = 16
+                                                          where ss_store_sk = 661
                                                             and ss_addr_sk is null
                                                           group by ss_store_sk))V2)V21
              where rnk  < 11) descending,
@@ -2284,11 +2284,11 @@
             and store_sales.ss_store_sk = store.s_store_sk  
             and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk
             and store_sales.ss_addr_sk = customer_address.ca_address_sk
-            and (household_demographics.hd_dep_count = 1 or
-                 household_demographics.hd_vehicle_count= 0)
+            and (household_demographics.hd_dep_count = 9 or
+                 household_demographics.hd_vehicle_count= 3)
             and date_dim.d_dow in (6,0)
             and date_dim.d_year in (2000,2000+1,2000+2) 
-            and store.s_city in ('Midway','Franklin','Oakdale','Walnut Grove','Harmony') 
+            and store.s_city in ('Hamilton','Harmony','Lincoln','Union','Valley View') 
             group by ss_ticket_number,ss_customer_sk,ss_addr_sk,ca_city) dn,customer,customer_address current_addr
             where ss_customer_sk = c_customer_sk
               and customer.c_current_addr_sk = current_addr.ca_address_sk
@@ -3646,10 +3646,10 @@
                 and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk
                 and store_sales.ss_addr_sk = customer_address.ca_address_sk
                 and date_dim.d_dom between 1 and 2 
-                and (household_demographics.hd_dep_count = 1 or
-                     household_demographics.hd_vehicle_count= 0)
+                and (household_demographics.hd_dep_count = 9 or
+                     household_demographics.hd_vehicle_count= 3)
                 and date_dim.d_year in (2000,2000+1,2000+2)
-                and store.s_city in ('Midway','Franklin')
+                and store.s_city in ('Hamilton','Harmony')
                group by ss_ticket_number
                        ,ss_customer_sk
                        ,ss_addr_sk,ca_city) dn
@@ -3837,13 +3837,13 @@
             and store_sales.ss_store_sk = store.s_store_sk  
             and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk
             and date_dim.d_dom between 1 and 2 
-            and (household_demographics.hd_buy_potential = '1001-5000' or
-                 household_demographics.hd_buy_potential = '5001-10000')
+            and (household_demographics.hd_buy_potential = '>10000' or
+                 household_demographics.hd_buy_potential = 'Unknown')
             and household_demographics.hd_vehicle_count > 0
             and case when household_demographics.hd_vehicle_count > 0 then 
                      household_demographics.hd_dep_count/ household_demographics.hd_vehicle_count else null end > 1
-            and date_dim.d_year in (2000,2000+1,2000+2)
-            and store.s_county in ('Daviess County','Oglethorpe County','Williamson County','Levy County')
+            and date_dim.d_year in (1998,1998+1,1998+2)
+            and store.s_county in ('Essex County','Contra Costa County','Terry County','Huron County')
             group by ss_ticket_number,ss_customer_sk) dj,customer
             where ss_customer_sk = c_customer_sk
               and cnt between 1 and 5
