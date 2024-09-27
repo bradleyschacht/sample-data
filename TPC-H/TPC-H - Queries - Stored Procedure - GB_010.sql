@@ -3,18 +3,17 @@ DROP PROCEDURE IF EXISTS dbo.RunQuery
 GO
 
 CREATE PROCEDURE dbo.RunQuery
-    @Query                  NVARCHAR(20),
     @Dataset                NVARCHAR(50)     = 'TPC-H',
     @DataSize               NVARCHAR(50)     = 'GB_010',
     @Seed                   NVARCHAR(50)     = '81310311',
     @AdditionalInformation  NVARCHAR(MAX)    = NULL,
-    @QueryLog               NVARCHAR(MAX)    OUTPUT
+    @QueryCustomLog         NVARCHAR(MAX)    = '[]' OUTPUT
 AS
 BEGIN
 
     /*************************************   Notes   *************************************/
     /*
-        Generated on 2024-09-26
+        Generated on 2024-09-27
         This is the TPC-H 10 GB (GB_010) scale factor queries modified for Fabric DW T-SQL syntax.
 
         TPC-H Parameter Substitution (Version 3.0.0 build 0)
@@ -26,18 +25,13 @@ BEGIN
     /* Create the variables for runtime. */
     DECLARE @QueryStartTime    DATETIME2(6)
     DECLARE @QueryEndTime      DATETIME2(6)
-    DECLARE @SessionID         INT
+    DECLARE @SessionID         INT = @@SPID
 
 
-    /*************************************   Query Start   *************************************/
+    /*************************************   TPC-H Query 01   *************************************/
 
-    SET @SessionID         = @@SPID
-    SET @QueryStartTime    = GETDATE()
+    SET @QueryStartTime = GETDATE()
 
-
-    /*************************************   TPCH Query 01   *************************************/
-
-    IF @Query = 'TPC-H Query 01'
         select
         	l_returnflag,
         	l_linestatus,
@@ -61,10 +55,13 @@ BEGIN
         	l_linestatus
         option (label = 'TPC-H Query 01');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 01' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 02   *************************************/
 
-    IF @Query = 'TPC-H Query 02'
+    /*************************************   TPC-H Query 02   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100
         	s_acctbal,
         	s_name,
@@ -110,10 +107,13 @@ BEGIN
         	p_partkey
         option (label = 'TPC-H Query 02');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 02' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 03   *************************************/
 
-    IF @Query = 'TPC-H Query 03'
+    /*************************************   TPC-H Query 03   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 10
         	l_orderkey,
         	sum(l_extendedprice * (1 - l_discount)) as revenue,
@@ -138,10 +138,13 @@ BEGIN
         	o_orderdate
         option (label = 'TPC-H Query 03');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 03' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 04   *************************************/
 
-    IF @Query = 'TPC-H Query 04'
+    /*************************************   TPC-H Query 04   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	o_orderpriority,
         	count(*) as order_count
@@ -165,10 +168,13 @@ BEGIN
         	o_orderpriority
         option (label = 'TPC-H Query 04');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 04' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 05   *************************************/
 
-    IF @Query = 'TPC-H Query 05'
+    /*************************************   TPC-H Query 05   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	n_name,
         	sum(l_extendedprice * (1 - l_discount)) as revenue
@@ -195,10 +201,13 @@ BEGIN
         	revenue desc
         option (label = 'TPC-H Query 05');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 05' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 06   *************************************/
 
-    IF @Query = 'TPC-H Query 06'
+    /*************************************   TPC-H Query 06   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	sum(l_extendedprice * l_discount) as revenue
         from
@@ -210,10 +219,13 @@ BEGIN
         	and l_quantity < 24
         option (label = 'TPC-H Query 06');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 06' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 07   *************************************/
 
-    IF @Query = 'TPC-H Query 07'
+    /*************************************   TPC-H Query 07   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	supp_nation,
         	cust_nation,
@@ -255,10 +267,13 @@ BEGIN
         	l_year
         option (label = 'TPC-H Query 07');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 07' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 08   *************************************/
 
-    IF @Query = 'TPC-H Query 08'
+    /*************************************   TPC-H Query 08   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	o_year,
         	sum(case
@@ -298,10 +313,13 @@ BEGIN
         	o_year
         option (label = 'TPC-H Query 08');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 08' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 09   *************************************/
 
-    IF @Query = 'TPC-H Query 09'
+    /*************************************   TPC-H Query 09   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	nation,
         	o_year,
@@ -336,10 +354,13 @@ BEGIN
         	o_year desc
         option (label = 'TPC-H Query 09');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 09' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 10   *************************************/
 
-    IF @Query = 'TPC-H Query 10'
+    /*************************************   TPC-H Query 10   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 20
         	c_custkey,
         	c_name,
@@ -373,10 +394,13 @@ BEGIN
         	revenue desc
         option (label = 'TPC-H Query 10');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 10' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 11   *************************************/
 
-    IF @Query = 'TPC-H Query 11'
+    /*************************************   TPC-H Query 11   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	ps_partkey,
         	sum(ps_supplycost * ps_availqty) as value
@@ -406,10 +430,13 @@ BEGIN
         	value desc
         option (label = 'TPC-H Query 11');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 11' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 12   *************************************/
 
-    IF @Query = 'TPC-H Query 12'
+    /*************************************   TPC-H Query 12   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	l_shipmode,
         	sum(case
@@ -440,10 +467,13 @@ BEGIN
         	l_shipmode
         option (label = 'TPC-H Query 12');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 12' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 13   *************************************/
 
-    IF @Query = 'TPC-H Query 13'
+    /*************************************   TPC-H Query 13   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	c_count,
         	count(*) as custdist
@@ -466,10 +496,13 @@ BEGIN
         	c_count desc
         option (label = 'TPC-H Query 13');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 13' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 14   *************************************/
 
-    IF @Query = 'TPC-H Query 14'
+    /*************************************   TPC-H Query 14   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	100.00 * sum(case
         		when p_type like 'PROMO%'
@@ -485,11 +518,11 @@ BEGIN
         	and l_shipdate <  dateadd(month, +1, '1993-11-01') /*  and l_shipdate < date '1993-11-01' + interval '1' month  */
         option (label = 'TPC-H Query 14');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 14' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 15   *************************************/
 
-    IF @Query = 'TPC-H Query 15'
-    BEGIN
+    /*************************************   TPC-H Query 15   *************************************/
+
         drop view if exists revenue0 /*  New line added for error handling.  */
         EXEC ('create view revenue0 (supplier_no, total_revenue) as
         	select
@@ -503,6 +536,10 @@ BEGIN
         	group by
             l_suppkey')
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 15' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
+
+
+    SET @QueryStartTime = GETDATE()
 
         select
         	s_suppkey,
@@ -525,14 +562,18 @@ BEGIN
         	s_suppkey
         option (label = 'TPC-H Query 15');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 15' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
+
 
         drop view if exists revenue0 /*  drop view revenue0  */
-    END
+
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 15' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
 
-    /*************************************   TPCH Query 16   *************************************/
+    /*************************************   TPC-H Query 16   *************************************/
 
-    IF @Query = 'TPC-H Query 16'
+    SET @QueryStartTime = GETDATE()
+
         select
         	p_brand,
         	p_type,
@@ -565,10 +606,13 @@ BEGIN
         	p_size
         option (label = 'TPC-H Query 16');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 16' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 17   *************************************/
 
-    IF @Query = 'TPC-H Query 17'
+    /*************************************   TPC-H Query 17   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	sum(l_extendedprice) / 7.0 as avg_yearly
         from
@@ -588,10 +632,13 @@ BEGIN
         	)
         option (label = 'TPC-H Query 17');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 17' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 18   *************************************/
 
-    IF @Query = 'TPC-H Query 18'
+    /*************************************   TPC-H Query 18   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100
         	c_name,
         	c_custkey,
@@ -626,10 +673,13 @@ BEGIN
         	o_orderdate
         option (label = 'TPC-H Query 18');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 18' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 19   *************************************/
 
-    IF @Query = 'TPC-H Query 19'
+    /*************************************   TPC-H Query 19   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	sum(l_extendedprice* (1 - l_discount)) as revenue
         from
@@ -667,10 +717,13 @@ BEGIN
         	)
         option (label = 'TPC-H Query 19');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 19' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 20   *************************************/
 
-    IF @Query = 'TPC-H Query 20'
+    /*************************************   TPC-H Query 20   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	s_name,
         	s_address
@@ -710,10 +763,13 @@ BEGIN
         	s_name
         option (label = 'TPC-H Query 20');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 20' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 21   *************************************/
 
-    IF @Query = 'TPC-H Query 21'
+    /*************************************   TPC-H Query 21   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100
         	s_name,
         	count(*) as numwait
@@ -755,10 +811,13 @@ BEGIN
         	s_name
         option (label = 'TPC-H Query 21');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 21' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCH Query 22   *************************************/
 
-    IF @Query = 'TPC-H Query 22'
+    /*************************************   TPC-H Query 22   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select
         	cntrycode,
         	count(*) as numcust,
@@ -798,97 +857,13 @@ BEGIN
         	cntrycode
         option (label = 'TPC-H Query 22');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query 22' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
+
 
     /*************************************   Query End   *************************************/
 
-    SET @QueryEndTime = GETDATE()
-
-    SET @QueryLog = (SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, @Query AS Query, @QueryStartTime AS QueryStartTime, @QueryEndTime AS QueryEndTime FOR JSON PATH)
+    SELECT @QueryCustomLog
 END
 GO
 
 
-
-        DROP PROCEDURE IF EXISTS dbo.RunBenchmarkSequential
-        GO
-
-        CREATE PROCEDURE dbo.RunBenchmarkSequential
-        AS
-        BEGIN
-
-        DECLARE @Loop			INT = 1
-        DECLARE @QueryCustomLog	NVARCHAR(MAX) = '[]'
-
-        WHILE @Loop <= 22
-        BEGIN
-                
-            DECLARE @QueryLog		VARCHAR(MAX)
-            DECLARE @CurrentQuery 	VARCHAR(20) = 'TPC-H Query ' + RIGHT('00' + CONVERT(VARCHAR(2), @Loop) , 2)
-            
-            EXEC dbo.RunQuery @Query = @CurrentQuery, @QueryLog = @QueryLog OUTPUT
-
-            SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON(@QueryLog)
-
-            SET @Loop = @Loop + 1
-        END
-
-        SELECT @QueryCustomLog AS QueryCustomLog
-
-        END
-        GO
-        
-
-
-        DROP PROCEDURE IF EXISTS dbo.RunBenchmark
-        GO
-
-        CREATE PROCEDURE dbo.RunBenchmark
-        AS
-        BEGIN
-
-        DECLARE @Loop			INT = 1
-        DECLARE @QueryCustomLog	NVARCHAR(MAX) = '[]'
-
-        WHILE @Loop <= 22
-        BEGIN
-                
-            DECLARE @QueryLog				VARCHAR(MAX)
-            DECLARE @AdditionalInformation 	VARCHAR(MAX) = (SELECT 'Spec' AS QueryOrderType, @Loop AS QueryOrder FOR JSON PATH)
-            DECLARE @CurrentQuery 			VARCHAR(20) = 'TPC-H Query ' +
-                CASE 
-                    WHEN @Loop = 1  THEN '14'
-                    WHEN @Loop = 2  THEN '02'
-                    WHEN @Loop = 3  THEN '09'
-                    WHEN @Loop = 4  THEN '20'
-                    WHEN @Loop = 5  THEN '06'
-                    WHEN @Loop = 6  THEN '17'
-                    WHEN @Loop = 7  THEN '18'
-                    WHEN @Loop = 8  THEN '08'
-                    WHEN @Loop = 9  THEN '21'
-                    WHEN @Loop = 10 THEN '13'
-                    WHEN @Loop = 11 THEN '03'
-                    WHEN @Loop = 12 THEN '22'
-                    WHEN @Loop = 13 THEN '16'
-                    WHEN @Loop = 14 THEN '04'
-                    WHEN @Loop = 15 THEN '11'
-                    WHEN @Loop = 16 THEN '15'
-                    WHEN @Loop = 17 THEN '01'
-                    WHEN @Loop = 18 THEN '10'
-                    WHEN @Loop = 19 THEN '19'
-                    WHEN @Loop = 20 THEN '05'
-                    WHEN @Loop = 21 THEN '07'
-                    WHEN @Loop = 22 THEN '12'
-                END
-            
-            EXEC dbo.RunQuery @Query = @CurrentQuery, @AdditionalInformation = @AdditionalInformation, @QueryLog = @QueryLog OUTPUT
-
-            SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON(@QueryLog)
-
-            SET @Loop = @Loop + 1
-        END
-
-        SELECT @QueryCustomLog AS QueryCustomLog
-
-        END
-        GO
-        

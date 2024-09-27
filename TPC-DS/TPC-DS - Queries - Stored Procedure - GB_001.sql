@@ -3,18 +3,17 @@ DROP PROCEDURE IF EXISTS dbo.RunQuery
 GO
 
 CREATE PROCEDURE dbo.RunQuery
-    @Query                  NVARCHAR(20),
     @Dataset                NVARCHAR(50)     = 'TPC-DS',
     @DataSize               NVARCHAR(50)     = 'GB_001',
     @Seed                   NVARCHAR(50)     = '81310311',
     @AdditionalInformation  NVARCHAR(MAX)    = NULL,
-    @QueryLog               NVARCHAR(MAX)    OUTPUT
+    @QueryCustomLog         NVARCHAR(MAX)    = '[]' OUTPUT
 AS
 BEGIN
 
     /*************************************   Notes   *************************************/
     /*
-        Generated on 2024-09-26
+        Generated on 2024-09-27
         This is the TPC-DS 1 GB (GB_001) scale factor queries modified for Fabric DW T-SQL syntax.
 
         TPC-DS Parameter Substitution (Version 3.2.0)
@@ -26,19 +25,14 @@ BEGIN
     /* Create the variables for runtime. */
     DECLARE @QueryStartTime    DATETIME2(6)
     DECLARE @QueryEndTime      DATETIME2(6)
-    DECLARE @SessionID         INT
+    DECLARE @SessionID         INT = @@SPID
 
 
-    /*************************************   Query Start   *************************************/
+    /*************************************   TPC-DS Query 01   *************************************/
 
-    SET @SessionID         = @@SPID
-    SET @QueryStartTime    = GETDATE()
+    SET @QueryStartTime = GETDATE()
 
-
-    /*************************************   TPCDS Query 01   *************************************/
-
-    IF @Query = 'TPC-DS Query 01'
-        with customer_total_return as
+        ;with customer_total_return as
         (select sr_customer_sk as ctr_customer_sk
         ,sr_store_sk as ctr_store_sk
         ,sum(sr_fee) as ctr_total_return
@@ -61,11 +55,14 @@ BEGIN
         order by c_customer_id
         OPTION (LABEL = 'TPC-DS Query 01');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 02   *************************************/
 
-    IF @Query = 'TPC-DS Query 02'
-        with wscs as
+    /*************************************   TPC-DS Query 02   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with wscs as
          (select sold_date_sk
                 ,sales_price
           from (select ws_sold_date_sk sold_date_sk
@@ -124,10 +121,13 @@ BEGIN
  order by d_week_seq1
         OPTION (LABEL = 'TPC-DS Query 02');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 03   *************************************/
 
-    IF @Query = 'TPC-DS Query 03'
+    /*************************************   TPC-DS Query 03   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 dt.d_year 
                ,item.i_brand_id brand_id 
                ,item.i_brand brand
@@ -147,11 +147,14 @@ BEGIN
                  ,brand_id
         OPTION (LABEL = 'TPC-DS Query 03');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 04   *************************************/
 
-    IF @Query = 'TPC-DS Query 04'
-        with year_total as (
+    /*************************************   TPC-DS Query 04   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
                ,c_last_name customer_last_name
@@ -265,11 +268,14 @@ BEGIN
                  ,t_s_secyear.customer_birth_country
         OPTION (LABEL = 'TPC-DS Query 04');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 05   *************************************/
 
-    IF @Query = 'TPC-DS Query 05'
-        with ssr as
+    /*************************************   TPC-DS Query 05   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ssr as
          (select s_store_id,
                 sum(sales_price) as sales,
                 sum(profit) as profit,
@@ -395,10 +401,13 @@ BEGIN
                  ,id
         OPTION (LABEL = 'TPC-DS Query 05');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 06   *************************************/
 
-    IF @Query = 'TPC-DS Query 06'
+    /*************************************   TPC-DS Query 06   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 a.ca_state state, count(*) cnt
          from customer_address a
              ,customer c
@@ -423,10 +432,13 @@ BEGIN
          order by cnt, a.ca_state 
         OPTION (LABEL = 'TPC-DS Query 06');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 07   *************************************/
 
-    IF @Query = 'TPC-DS Query 07'
+    /*************************************   TPC-DS Query 07   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id, 
                 avg(ss_quantity) agg1,
                 avg(ss_list_price) agg2,
@@ -446,10 +458,13 @@ BEGIN
          order by i_item_id
         OPTION (LABEL = 'TPC-DS Query 07');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 08   *************************************/
 
-    IF @Query = 'TPC-DS Query 08'
+    /*************************************   TPC-DS Query 08   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 s_store_name
               ,sum(ss_net_profit)
          from store_sales
@@ -556,10 +571,13 @@ BEGIN
          order by s_store_name
         OPTION (LABEL = 'TPC-DS Query 08');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 09   *************************************/
 
-    IF @Query = 'TPC-DS Query 09'
+    /*************************************   TPC-DS Query 09   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select case when (select count(*) 
                           from store_sales 
                           where ss_quantity between 1 and 20) > 27322
@@ -609,10 +627,13 @@ BEGIN
         where r_reason_sk = 1
         OPTION (LABEL = 'TPC-DS Query 09');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 10   *************************************/
 
-    IF @Query = 'TPC-DS Query 10'
+    /*************************************   TPC-DS Query 10   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
           cd_gender,
           cd_marital_status,
@@ -670,11 +691,14 @@ BEGIN
                   cd_dep_college_count
         OPTION (LABEL = 'TPC-DS Query 10');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 11   *************************************/
 
-    IF @Query = 'TPC-DS Query 11'
-        with year_total as (
+    /*************************************   TPC-DS Query 11   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
                ,c_last_name customer_last_name
@@ -753,10 +777,13 @@ BEGIN
                  ,t_s_secyear.customer_birth_country
         OPTION (LABEL = 'TPC-DS Query 11');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 12   *************************************/
 
-    IF @Query = 'TPC-DS Query 12'
+    /*************************************   TPC-DS Query 12   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id
               ,i_item_desc 
               ,i_category 
@@ -789,10 +816,13 @@ BEGIN
                 ,revenueratio
         OPTION (LABEL = 'TPC-DS Query 12');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 13   *************************************/
 
-    IF @Query = 'TPC-DS Query 13'
+    /*************************************   TPC-DS Query 13   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select avg(ss_quantity)
                ,avg(ss_ext_sales_price)
                ,avg(ss_ext_wholesale_cost)
@@ -843,11 +873,14 @@ BEGIN
              ))
         OPTION (LABEL = 'TPC-DS Query 13');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 14   *************************************/
 
-    IF @Query = 'TPC-DS Query 14'
-        with  cross_items as
+    /*************************************   TPC-DS Query 14   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with  cross_items as
          (select i_item_sk ss_item_sk
          from item,
          (select iss.i_brand_id brand_id
@@ -1055,10 +1088,13 @@ BEGIN
          order by this_year.channel, this_year.i_brand_id, this_year.i_class_id, this_year.i_category_id
         OPTION (LABEL = 'TPC-DS Query 14');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 15   *************************************/
 
-    IF @Query = 'TPC-DS Query 15'
+    /*************************************   TPC-DS Query 15   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 ca_zip
                ,sum(cs_sales_price)
          from catalog_sales
@@ -1077,10 +1113,13 @@ BEGIN
          order by ca_zip
         OPTION (LABEL = 'TPC-DS Query 15');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 16   *************************************/
 
-    IF @Query = 'TPC-DS Query 16'
+    /*************************************   TPC-DS Query 16   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
            count(distinct cs_order_number) as "order count"
           ,sum(cs_ext_ship_cost) as "total shipping cost"
@@ -1110,10 +1149,13 @@ BEGIN
         order by count(distinct cs_order_number)
         OPTION (LABEL = 'TPC-DS Query 16');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 17   *************************************/
 
-    IF @Query = 'TPC-DS Query 17'
+    /*************************************   TPC-DS Query 17   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id
                ,i_item_desc
                ,s_state
@@ -1157,10 +1199,13 @@ BEGIN
                  ,s_state
         OPTION (LABEL = 'TPC-DS Query 17');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 18   *************************************/
 
-    IF @Query = 'TPC-DS Query 18'
+    /*************************************   TPC-DS Query 18   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id,
                 ca_country,
                 ca_state, 
@@ -1193,10 +1238,13 @@ BEGIN
         	i_item_id
         OPTION (LABEL = 'TPC-DS Query 18');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 19   *************************************/
 
-    IF @Query = 'TPC-DS Query 19'
+    /*************************************   TPC-DS Query 19   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_brand_id brand_id, i_brand brand, i_manufact_id, i_manufact,
          	sum(ss_ext_sales_price) ext_price
          from date_dim, store_sales, item,customer,customer_address,store
@@ -1220,10 +1268,13 @@ BEGIN
                  ,i_manufact
         OPTION (LABEL = 'TPC-DS Query 19');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 20   *************************************/
 
-    IF @Query = 'TPC-DS Query 20'
+    /*************************************   TPC-DS Query 20   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id
                ,i_item_desc 
                ,i_category 
@@ -1252,10 +1303,13 @@ BEGIN
                  ,revenueratio
         OPTION (LABEL = 'TPC-DS Query 20');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 21   *************************************/
 
-    IF @Query = 'TPC-DS Query 21'
+    /*************************************   TPC-DS Query 21   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 *
          from(select w_warehouse_name
                     ,i_item_id
@@ -1284,10 +1338,13 @@ BEGIN
                  ,i_item_id
         OPTION (LABEL = 'TPC-DS Query 21');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 22   *************************************/
 
-    IF @Query = 'TPC-DS Query 22'
+    /*************************************   TPC-DS Query 22   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_product_name
                      ,i_brand
                      ,i_class
@@ -1306,11 +1363,14 @@ BEGIN
         order by qoh, i_product_name, i_brand, i_class, i_category
         OPTION (LABEL = 'TPC-DS Query 22');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 23   *************************************/
 
-    IF @Query = 'TPC-DS Query 23'
-        with frequent_ss_items as 
+    /*************************************   TPC-DS Query 23   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with frequent_ss_items as
         (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt /* (select substr(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt */
           from store_sales
               ,date_dim 
@@ -1415,11 +1475,14 @@ BEGIN
              order by c_last_name,c_first_name,sales
         OPTION (LABEL = 'TPC-DS Query 23');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 24   *************************************/
 
-    IF @Query = 'TPC-DS Query 24'
-        with ssales as
+    /*************************************   TPC-DS Query 24   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ssales as
         (select c_last_name
               ,c_first_name
               ,s_store_name
@@ -1524,10 +1587,13 @@ BEGIN
                 ,s_store_name
         OPTION (LABEL = 'TPC-DS Query 24');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 25   *************************************/
 
-    IF @Query = 'TPC-DS Query 25'
+    /*************************************   TPC-DS Query 25   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
          i_item_id
          ,i_item_desc
@@ -1574,10 +1640,13 @@ BEGIN
          ,s_store_name
         OPTION (LABEL = 'TPC-DS Query 25');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 26   *************************************/
 
-    IF @Query = 'TPC-DS Query 26'
+    /*************************************   TPC-DS Query 26   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id, 
                 avg(cs_quantity) agg1,
                 avg(cs_list_price) agg2,
@@ -1597,10 +1666,13 @@ BEGIN
          order by i_item_id
         OPTION (LABEL = 'TPC-DS Query 26');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 27   *************************************/
 
-    IF @Query = 'TPC-DS Query 27'
+    /*************************************   TPC-DS Query 27   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id,
                 s_state, grouping(s_state) g_state,
                 avg(ss_quantity) agg1,
@@ -1622,10 +1694,13 @@ BEGIN
                  ,s_state
         OPTION (LABEL = 'TPC-DS Query 27');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 28   *************************************/
 
-    IF @Query = 'TPC-DS Query 28'
+    /*************************************   TPC-DS Query 28   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 *
         from (select avg(ss_list_price) B1_LP
                     ,count(ss_list_price) B1_CNT
@@ -1677,10 +1752,13 @@ BEGIN
                   or ss_wholesale_cost between 18 and 18+20)) B6
         OPTION (LABEL = 'TPC-DS Query 28');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 29   *************************************/
 
-    IF @Query = 'TPC-DS Query 29'
+    /*************************************   TPC-DS Query 29   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100  
              i_item_id
             ,i_item_desc
@@ -1726,11 +1804,14 @@ BEGIN
            ,s_store_name
         OPTION (LABEL = 'TPC-DS Query 29');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 30   *************************************/
 
-    IF @Query = 'TPC-DS Query 30'
-        with customer_total_return as
+    /*************************************   TPC-DS Query 30   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with customer_total_return as
          (select wr_returning_customer_sk as ctr_customer_sk
                 ,ca_state as ctr_state, 
          	sum(wr_return_amt) as ctr_total_return
@@ -1759,11 +1840,14 @@ BEGIN
                           ,c_last_review_date_sk,ctr_total_return
         OPTION (LABEL = 'TPC-DS Query 30');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 31   *************************************/
 
-    IF @Query = 'TPC-DS Query 31'
-        with ss as
+    /*************************************   TPC-DS Query 31   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ss as
          (select ca_county,d_qoy, d_year,sum(ss_ext_sales_price) as store_sales
          from store_sales,date_dim,customer_address
          where ss_sold_date_sk = d_date_sk
@@ -1814,10 +1898,13 @@ BEGIN
  order by store_q1_q2_increase
         OPTION (LABEL = 'TPC-DS Query 31');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 32   *************************************/
 
-    IF @Query = 'TPC-DS Query 32'
+    /*************************************   TPC-DS Query 32   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 sum(cs_ext_discount_amt)  as "excess discount amount" 
         from 
            catalog_sales 
@@ -1844,11 +1931,14 @@ BEGIN
               ) 
         OPTION (LABEL = 'TPC-DS Query 32');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 33   *************************************/
 
-    IF @Query = 'TPC-DS Query 33'
-        with ss as (
+    /*************************************   TPC-DS Query 33   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ss as (
          select
                   i_manufact_id,sum(ss_ext_sales_price) total_sales
          from
@@ -1921,10 +2011,13 @@ BEGIN
          order by total_sales
         OPTION (LABEL = 'TPC-DS Query 33');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 34   *************************************/
 
-    IF @Query = 'TPC-DS Query 34'
+    /*************************************   TPC-DS Query 34   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select c_last_name
                ,c_first_name
                ,c_salutation
@@ -1955,10 +2048,13 @@ BEGIN
     order by c_last_name,c_first_name,c_salutation,c_preferred_cust_flag desc, ss_ticket_number
         OPTION (LABEL = 'TPC-DS Query 34');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 35   *************************************/
 
-    IF @Query = 'TPC-DS Query 35'
+    /*************************************   TPC-DS Query 35   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100  
           ca_state,
           cd_gender,
@@ -2015,10 +2111,13 @@ BEGIN
                   cd_dep_college_count
         OPTION (LABEL = 'TPC-DS Query 35');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 36   *************************************/
 
-    IF @Query = 'TPC-DS Query 36'
+    /*************************************   TPC-DS Query 36   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
             sum(ss_net_profit)/sum(ss_ext_sales_price) as gross_margin
            ,i_category
@@ -2047,10 +2146,13 @@ BEGIN
           ,rank_within_parent
         OPTION (LABEL = 'TPC-DS Query 36');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 37   *************************************/
 
-    IF @Query = 'TPC-DS Query 37'
+    /*************************************   TPC-DS Query 37   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id
                ,i_item_desc
                ,i_current_price
@@ -2066,10 +2168,13 @@ BEGIN
          order by i_item_id
         OPTION (LABEL = 'TPC-DS Query 37');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 38   *************************************/
 
-    IF @Query = 'TPC-DS Query 38'
+    /*************************************   TPC-DS Query 38   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 count(*) from (
             select distinct c_last_name, c_first_name, d_date
             from store_sales, date_dim, customer
@@ -2091,11 +2196,14 @@ BEGIN
         ) hot_cust
         OPTION (LABEL = 'TPC-DS Query 38');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 39   *************************************/
 
-    IF @Query = 'TPC-DS Query 39'
-        with inv as
+    /*************************************   TPC-DS Query 39   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with inv as
         (select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy
                ,stdev,mean, case mean when 0 then null else stdev/mean end cov
          from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy
@@ -2147,10 +2255,13 @@ BEGIN
                 ,inv2.d_moy,inv2.mean, inv2.cov
         OPTION (LABEL = 'TPC-DS Query 39');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 40   *************************************/
 
-    IF @Query = 'TPC-DS Query 40'
+    /*************************************   TPC-DS Query 40   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
            w_state
           ,i_item_id
@@ -2177,10 +2288,13 @@ BEGIN
          order by w_state,i_item_id
         OPTION (LABEL = 'TPC-DS Query 40');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 41   *************************************/
 
-    IF @Query = 'TPC-DS Query 41'
+    /*************************************   TPC-DS Query 41   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select distinct top 100 (i_product_name) /* select top 100 distinct(i_product_name) */
          from item i1
          where i_manufact_id between 682 and 682+40 
@@ -2231,10 +2345,13 @@ BEGIN
          order by i_product_name
         OPTION (LABEL = 'TPC-DS Query 41');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 42   *************************************/
 
-    IF @Query = 'TPC-DS Query 42'
+    /*************************************   TPC-DS Query 42   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 dt.d_year
          	,item.i_category_id
          	,item.i_category
@@ -2255,10 +2372,13 @@ BEGIN
          		,item.i_category
         OPTION (LABEL = 'TPC-DS Query 42');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 43   *************************************/
 
-    IF @Query = 'TPC-DS Query 43'
+    /*************************************   TPC-DS Query 43   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 s_store_name, s_store_id,
                 sum(case when (d_day_name='Sunday') then ss_sales_price else null end) sun_sales,
                 sum(case when (d_day_name='Monday') then ss_sales_price else null end) mon_sales,
@@ -2276,10 +2396,13 @@ BEGIN
          order by s_store_name, s_store_id,sun_sales,mon_sales,tue_sales,wed_sales,thu_sales,fri_sales,sat_sales
         OPTION (LABEL = 'TPC-DS Query 43');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 44   *************************************/
 
-    IF @Query = 'TPC-DS Query 44'
+    /*************************************   TPC-DS Query 44   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing
         from(select *
              from (select item_sk,rank() over (order by rank_col asc) rnk
@@ -2313,10 +2436,13 @@ BEGIN
         order by asceding.rnk
         OPTION (LABEL = 'TPC-DS Query 44');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 45   *************************************/
 
-    IF @Query = 'TPC-DS Query 45'
+    /*************************************   TPC-DS Query 45   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 ca_zip, ca_city, sum(ws_sales_price)
          from web_sales, customer, customer_address, date_dim, item
          where ws_bill_customer_sk = c_customer_sk
@@ -2335,10 +2461,13 @@ BEGIN
          order by ca_zip, ca_city
         OPTION (LABEL = 'TPC-DS Query 45');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 46   *************************************/
 
-    IF @Query = 'TPC-DS Query 46'
+    /*************************************   TPC-DS Query 46   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 c_last_name
                ,c_first_name
                ,ca_city
@@ -2372,11 +2501,14 @@ BEGIN
                   ,ss_ticket_number
         OPTION (LABEL = 'TPC-DS Query 46');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 47   *************************************/
 
-    IF @Query = 'TPC-DS Query 47'
-        with v1 as(
+    /*************************************   TPC-DS Query 47   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with v1 as(
          select i_category, i_brand,
                 s_store_name, s_company_name,
                 d_year, d_moy,
@@ -2425,10 +2557,13 @@ BEGIN
          order by sum_sales - avg_monthly_sales, sum_sales
         OPTION (LABEL = 'TPC-DS Query 47');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 48   *************************************/
 
-    IF @Query = 'TPC-DS Query 48'
+    /*************************************   TPC-DS Query 48   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select sum (ss_quantity)
          from store_sales, store, customer_demographics, customer_address, date_dim
          where s_store_sk = ss_store_sk
@@ -2494,10 +2629,13 @@ BEGIN
          )
         OPTION (LABEL = 'TPC-DS Query 48');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 49   *************************************/
 
-    IF @Query = 'TPC-DS Query 49'
+    /*************************************   TPC-DS Query 49   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 channel, item, return_ratio, return_rank, currency_rank from
          (select
          'web' as channel
@@ -2625,10 +2763,13 @@ BEGIN
          order by 1,4,5,2
         OPTION (LABEL = 'TPC-DS Query 49');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 50   *************************************/
 
-    IF @Query = 'TPC-DS Query 50'
+    /*************************************   TPC-DS Query 50   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
            s_store_name
           ,s_company_id
@@ -2686,11 +2827,14 @@ BEGIN
                 ,s_zip
         OPTION (LABEL = 'TPC-DS Query 50');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 51   *************************************/
 
-    IF @Query = 'TPC-DS Query 51'
-        WITH web_v1 as (
+    /*************************************   TPC-DS Query 51   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;WITH web_v1 as (
         select
           ws_item_sk item_sk, d_date,
           sum(sum(ws_sales_price))
@@ -2733,10 +2877,13 @@ BEGIN
                 ,d_date
         OPTION (LABEL = 'TPC-DS Query 51');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 52   *************************************/
 
-    IF @Query = 'TPC-DS Query 52'
+    /*************************************   TPC-DS Query 52   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 dt.d_year
          	,item.i_brand_id brand_id
          	,item.i_brand brand
@@ -2757,10 +2904,13 @@ BEGIN
          	,brand_id
         OPTION (LABEL = 'TPC-DS Query 52');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 53   *************************************/
 
-    IF @Query = 'TPC-DS Query 53'
+    /*************************************   TPC-DS Query 53   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 * from 
         (select i_manufact_id,
         sum(ss_sales_price) sum_sales,
@@ -2787,11 +2937,14 @@ BEGIN
         	 i_manufact_id
         OPTION (LABEL = 'TPC-DS Query 53');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 54   *************************************/
 
-    IF @Query = 'TPC-DS Query 54'
-        with my_customers as (
+    /*************************************   TPC-DS Query 54   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with my_customers as (
          select distinct c_customer_sk
                 , c_current_addr_sk
          from   
@@ -2845,10 +2998,13 @@ BEGIN
          order by segment, num_customers
         OPTION (LABEL = 'TPC-DS Query 54');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 55   *************************************/
 
-    IF @Query = 'TPC-DS Query 55'
+    /*************************************   TPC-DS Query 55   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_brand_id brand_id, i_brand brand,
          	sum(ss_ext_sales_price) ext_price
          from date_dim, store_sales, item
@@ -2861,11 +3017,14 @@ BEGIN
          order by ext_price desc, i_brand_id
         OPTION (LABEL = 'TPC-DS Query 55');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 56   *************************************/
 
-    IF @Query = 'TPC-DS Query 56'
-        with ss as (
+    /*************************************   TPC-DS Query 56   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ss as (
          select i_item_id,sum(ss_ext_sales_price) total_sales
          from
          	store_sales,
@@ -2932,11 +3091,14 @@ BEGIN
                   i_item_id
         OPTION (LABEL = 'TPC-DS Query 56');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 57   *************************************/
 
-    IF @Query = 'TPC-DS Query 57'
-        with v1 as(
+    /*************************************   TPC-DS Query 57   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with v1 as(
          select i_category, i_brand,
                 cc_name,
                 d_year, d_moy,
@@ -2982,11 +3144,14 @@ BEGIN
          order by sum_sales - avg_monthly_sales, sum_sales
         OPTION (LABEL = 'TPC-DS Query 57');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 58   *************************************/
 
-    IF @Query = 'TPC-DS Query 58'
-        with ss_items as
+    /*************************************   TPC-DS Query 58   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ss_items as
          (select i_item_id item_id
                 ,sum(ss_ext_sales_price) ss_item_rev 
          from store_sales
@@ -3049,11 +3214,14 @@ BEGIN
                  ,ss_item_rev
         OPTION (LABEL = 'TPC-DS Query 58');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 59   *************************************/
 
-    IF @Query = 'TPC-DS Query 59'
-        with wss as 
+    /*************************************   TPC-DS Query 59   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with wss as
          (select d_week_seq,
                 ss_store_sk,
                 sum(case when (d_day_name='Sunday') then ss_sales_price else null end) sun_sales,
@@ -3095,11 +3263,14 @@ BEGIN
          order by s_store_name1,s_store_id1,d_week_seq1
         OPTION (LABEL = 'TPC-DS Query 59');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 60   *************************************/
 
-    IF @Query = 'TPC-DS Query 60'
-        with ss as (
+    /*************************************   TPC-DS Query 60   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ss as (
          select
                   i_item_id,sum(ss_ext_sales_price) total_sales
          from
@@ -3175,10 +3346,13 @@ BEGIN
               ,total_sales
         OPTION (LABEL = 'TPC-DS Query 60');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 61   *************************************/
 
-    IF @Query = 'TPC-DS Query 61'
+    /*************************************   TPC-DS Query 61   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100
         from
           (select sum(ss_ext_sales_price) promotions
@@ -3221,10 +3395,13 @@ BEGIN
         order by promotions, total
         OPTION (LABEL = 'TPC-DS Query 61');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 62   *************************************/
 
-    IF @Query = 'TPC-DS Query 62'
+    /*************************************   TPC-DS Query 62   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
         substring(w_warehouse_name,1,20) /* substr(w_warehouse_name,1,20) */
           ,sm_type
@@ -3258,10 +3435,13 @@ BEGIN
                ,web_name
         OPTION (LABEL = 'TPC-DS Query 62');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 63   *************************************/
 
-    IF @Query = 'TPC-DS Query 63'
+    /*************************************   TPC-DS Query 63   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 * 
         from (select i_manager_id
                      ,sum(ss_sales_price) sum_sales
@@ -3289,11 +3469,14 @@ BEGIN
                 ,sum_sales
         OPTION (LABEL = 'TPC-DS Query 63');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 64   *************************************/
 
-    IF @Query = 'TPC-DS Query 64'
-        with cs_ui as
+    /*************************************   TPC-DS Query 64   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with cs_ui as
          (select cs_item_sk
                 ,sum(cs_ext_list_price) as sale,sum(cr_refunded_cash+cr_reversed_charge+cr_store_credit) as refund
           from catalog_sales
@@ -3413,10 +3596,13 @@ BEGIN
        ,cs2.s1
         OPTION (LABEL = 'TPC-DS Query 64');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 65   *************************************/
 
-    IF @Query = 'TPC-DS Query 65'
+    /*************************************   TPC-DS Query 65   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100
         	s_store_name,
         	i_item_desc,
@@ -3444,10 +3630,13 @@ BEGIN
          order by s_store_name, i_item_desc
         OPTION (LABEL = 'TPC-DS Query 65');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 66   *************************************/
 
-    IF @Query = 'TPC-DS Query 66'
+    /*************************************   TPC-DS Query 66   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100  
                  w_warehouse_name
          	,w_warehouse_sq_ft
@@ -3666,10 +3855,13 @@ BEGIN
          order by w_warehouse_name
         OPTION (LABEL = 'TPC-DS Query 66');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 67   *************************************/
 
-    IF @Query = 'TPC-DS Query 67'
+    /*************************************   TPC-DS Query 67   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 *
         from (select i_category
                     ,i_class
@@ -3712,10 +3904,13 @@ BEGIN
                 ,rk
         OPTION (LABEL = 'TPC-DS Query 67');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 68   *************************************/
 
-    IF @Query = 'TPC-DS Query 68'
+    /*************************************   TPC-DS Query 68   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 c_last_name
                ,c_first_name
                ,ca_city
@@ -3756,10 +3951,13 @@ BEGIN
                  ,ss_ticket_number
         OPTION (LABEL = 'TPC-DS Query 68');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 69   *************************************/
 
-    IF @Query = 'TPC-DS Query 69'
+    /*************************************   TPC-DS Query 69   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
           cd_gender,
           cd_marital_status,
@@ -3805,10 +4003,13 @@ BEGIN
                   cd_credit_rating
         OPTION (LABEL = 'TPC-DS Query 69');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 70   *************************************/
 
-    IF @Query = 'TPC-DS Query 70'
+    /*************************************   TPC-DS Query 70   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
             sum(ss_net_profit) as total_sum
            ,s_state
@@ -3845,10 +4046,13 @@ BEGIN
           ,rank_within_parent
         OPTION (LABEL = 'TPC-DS Query 70');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 71   *************************************/
 
-    IF @Query = 'TPC-DS Query 71'
+    /*************************************   TPC-DS Query 71   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select i_brand_id brand_id, i_brand brand,t_hour,t_minute,
          	sum(ext_price) ext_price
          from item, (select ws_ext_sales_price as ext_price, 
@@ -3887,10 +4091,13 @@ BEGIN
          order by ext_price desc, i_brand_id
         OPTION (LABEL = 'TPC-DS Query 71');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 72   *************************************/
 
-    IF @Query = 'TPC-DS Query 72'
+    /*************************************   TPC-DS Query 72   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_desc
               ,w_warehouse_name
               ,d1.d_week_seq
@@ -3918,10 +4125,13 @@ BEGIN
         order by total_cnt desc, i_item_desc, w_warehouse_name, d_week_seq
         OPTION (LABEL = 'TPC-DS Query 72');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 73   *************************************/
 
-    IF @Query = 'TPC-DS Query 73'
+    /*************************************   TPC-DS Query 73   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select c_last_name
                ,c_first_name
                ,c_salutation
@@ -3949,11 +4159,14 @@ BEGIN
     order by cnt desc, c_last_name asc
         OPTION (LABEL = 'TPC-DS Query 73');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 74   *************************************/
 
-    IF @Query = 'TPC-DS Query 74'
-        with year_total as (
+    /*************************************   TPC-DS Query 74   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
                ,c_last_name customer_last_name
@@ -4012,11 +4225,14 @@ BEGIN
          order by 1,2,3
         OPTION (LABEL = 'TPC-DS Query 74');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 75   *************************************/
 
-    IF @Query = 'TPC-DS Query 75'
-        WITH all_sales AS (
+    /*************************************   TPC-DS Query 75   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;WITH all_sales AS (
          SELECT d_year
                ,i_brand_id
                ,i_class_id
@@ -4084,10 +4300,13 @@ BEGIN
          ORDER BY sales_cnt_diff,sales_amt_diff
         OPTION (LABEL = 'TPC-DS Query 75');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 76   *************************************/
 
-    IF @Query = 'TPC-DS Query 76'
+    /*************************************   TPC-DS Query 76   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (
                 SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price
                  FROM store_sales, item, date_dim
@@ -4110,11 +4329,14 @@ BEGIN
         ORDER BY channel, col_name, d_year, d_qoy, i_category
         OPTION (LABEL = 'TPC-DS Query 76');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 77   *************************************/
 
-    IF @Query = 'TPC-DS Query 77'
-        with ss as
+    /*************************************   TPC-DS Query 77   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ss as
          (select s_store_sk,
                  sum(ss_ext_sales_price) as sales,
                  sum(ss_net_profit) as profit
@@ -4220,11 +4442,14 @@ BEGIN
                  ,id
         OPTION (LABEL = 'TPC-DS Query 77');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 78   *************************************/
 
-    IF @Query = 'TPC-DS Query 78'
-        with ws as
+    /*************************************   TPC-DS Query 78   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ws as
           (select d_year AS ws_sold_year, ws_item_sk,
             ws_bill_customer_sk ws_customer_sk,
             sum(ws_quantity) ws_qty,
@@ -4280,10 +4505,13 @@ BEGIN
           ratio
         OPTION (LABEL = 'TPC-DS Query 78');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 79   *************************************/
 
-    IF @Query = 'TPC-DS Query 79'
+    /*************************************   TPC-DS Query 79   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100
         c_last_name,c_first_name,substring(s_city,1,30),ss_ticket_number,amt,profit /* c_last_name,c_first_name,substr(s_city,1,30),ss_ticket_number,amt,profit */
           from
@@ -4305,11 +4533,14 @@ BEGIN
         order by c_last_name,c_first_name,substring(s_city,1,30), profit /* order by c_last_name,c_first_name,substr(s_city,1,30), profit */
         OPTION (LABEL = 'TPC-DS Query 79');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 80   *************************************/
 
-    IF @Query = 'TPC-DS Query 80'
-        with ssr as
+    /*************************************   TPC-DS Query 80   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ssr as
          (select  s_store_id as store_id,
                   sum(ss_ext_sales_price) as sales,
                   sum(coalesce(sr_return_amt, 0)) as returns,
@@ -4403,11 +4634,14 @@ BEGIN
                  ,id
         OPTION (LABEL = 'TPC-DS Query 80');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 81   *************************************/
 
-    IF @Query = 'TPC-DS Query 81'
-        with customer_total_return as
+    /*************************************   TPC-DS Query 81   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with customer_total_return as
          (select cr_returning_customer_sk as ctr_customer_sk
                 ,ca_state as ctr_state, 
          	sum(cr_return_amt_inc_tax) as ctr_total_return
@@ -4436,10 +4670,13 @@ BEGIN
                           ,ca_location_type,ctr_total_return
         OPTION (LABEL = 'TPC-DS Query 81');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 82   *************************************/
 
-    IF @Query = 'TPC-DS Query 82'
+    /*************************************   TPC-DS Query 82   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 i_item_id
                ,i_item_desc
                ,i_current_price
@@ -4455,11 +4692,14 @@ BEGIN
          order by i_item_id
         OPTION (LABEL = 'TPC-DS Query 82');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 83   *************************************/
 
-    IF @Query = 'TPC-DS Query 83'
-        with sr_items as
+    /*************************************   TPC-DS Query 83   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with sr_items as
          (select i_item_id item_id,
                 sum(sr_return_quantity) sr_item_qty
          from store_returns,
@@ -4524,10 +4764,13 @@ BEGIN
                  ,sr_item_qty
         OPTION (LABEL = 'TPC-DS Query 83');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 84   *************************************/
 
-    IF @Query = 'TPC-DS Query 84'
+    /*************************************   TPC-DS Query 84   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 c_customer_id as customer_id
                , coalesce(c_last_name,'')  +  ', '  +  coalesce(c_first_name,'') as customername /*  , coalesce(c_last_name,'') || ', ' || coalesce(c_first_name,'') as customername  */
          from customer
@@ -4547,10 +4790,13 @@ BEGIN
          order by c_customer_id
         OPTION (LABEL = 'TPC-DS Query 84');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 85   *************************************/
 
-    IF @Query = 'TPC-DS Query 85'
+    /*************************************   TPC-DS Query 85   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 substring(r_reason_desc,1,20) /* select top 100 substr(r_reason_desc,1,20) */
                ,avg(ws_quantity)
                ,avg(wr_refunded_cash)
@@ -4633,10 +4879,13 @@ BEGIN
                 ,avg(wr_fee)
         OPTION (LABEL = 'TPC-DS Query 85');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 86   *************************************/
 
-    IF @Query = 'TPC-DS Query 86'
+    /*************************************   TPC-DS Query 86   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100  
             sum(ws_net_paid) as total_sum
            ,i_category
@@ -4661,10 +4910,13 @@ BEGIN
            rank_within_parent
         OPTION (LABEL = 'TPC-DS Query 86');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 87   *************************************/
 
-    IF @Query = 'TPC-DS Query 87'
+    /*************************************   TPC-DS Query 87   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select count(*) 
         from ((select distinct c_last_name, c_first_name, d_date
                from store_sales, date_dim, customer
@@ -4686,10 +4938,13 @@ BEGIN
         ) cool_cust
         OPTION (LABEL = 'TPC-DS Query 87');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 88   *************************************/
 
-    IF @Query = 'TPC-DS Query 88'
+    /*************************************   TPC-DS Query 88   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select  *
         from
          (select count(*) h8_30_to_9
@@ -4782,10 +5037,13 @@ BEGIN
              and store.s_store_name = 'ese') s8
         OPTION (LABEL = 'TPC-DS Query 88');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 89   *************************************/
 
-    IF @Query = 'TPC-DS Query 89'
+    /*************************************   TPC-DS Query 89   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 *
         from(
         select i_category, i_class, i_brand,
@@ -4812,10 +5070,13 @@ BEGIN
         order by sum_sales - avg_monthly_sales, s_store_name
         OPTION (LABEL = 'TPC-DS Query 89');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 90   *************************************/
 
-    IF @Query = 'TPC-DS Query 90'
+    /*************************************   TPC-DS Query 90   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 cast(amc as decimal(15,4))/cast(pmc as decimal(15,4)) am_pm_ratio
          from ( select count(*) amc
                from web_sales, household_demographics , time_dim, web_page
@@ -4836,10 +5097,13 @@ BEGIN
          order by am_pm_ratio
         OPTION (LABEL = 'TPC-DS Query 90');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 91   *************************************/
 
-    IF @Query = 'TPC-DS Query 91'
+    /*************************************   TPC-DS Query 91   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select  
                 cc_call_center_id Call_Center,
                 cc_name Call_Center_Name,
@@ -4870,10 +5134,13 @@ BEGIN
 order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 91');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 92   *************************************/
 
-    IF @Query = 'TPC-DS Query 92'
+    /*************************************   TPC-DS Query 92   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
            sum(ws_ext_discount_amt)  as "Excess Discount Amount" 
         from 
@@ -4902,10 +5169,13 @@ order by sum(cr_net_loss) desc
         order by sum(ws_ext_discount_amt)
         OPTION (LABEL = 'TPC-DS Query 92');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 93   *************************************/
 
-    IF @Query = 'TPC-DS Query 93'
+    /*************************************   TPC-DS Query 93   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 ss_customer_sk
                     ,sum(act_sales) sumsales
               from (select ss_item_sk
@@ -4922,10 +5192,13 @@ order by sum(cr_net_loss) desc
               order by sumsales, ss_customer_sk
         OPTION (LABEL = 'TPC-DS Query 93');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 94   *************************************/
 
-    IF @Query = 'TPC-DS Query 94'
+    /*************************************   TPC-DS Query 94   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
            count(distinct ws_order_number) as "order count"
           ,sum(ws_ext_ship_cost) as "total shipping cost"
@@ -4953,11 +5226,14 @@ order by sum(cr_net_loss) desc
         order by count(distinct ws_order_number)
         OPTION (LABEL = 'TPC-DS Query 94');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 95   *************************************/
 
-    IF @Query = 'TPC-DS Query 95'
-        with ws_wh as
+    /*************************************   TPC-DS Query 95   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ws_wh as
         (select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2
          from web_sales ws1,web_sales ws2
          where ws1.ws_order_number = ws2.ws_order_number
@@ -4987,10 +5263,13 @@ order by sum(cr_net_loss) desc
         order by count(distinct ws_order_number)
         OPTION (LABEL = 'TPC-DS Query 95');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 96   *************************************/
 
-    IF @Query = 'TPC-DS Query 96'
+    /*************************************   TPC-DS Query 96   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 count(*) 
         from store_sales
             ,household_demographics 
@@ -5005,11 +5284,14 @@ order by sum(cr_net_loss) desc
         order by count(*)
         OPTION (LABEL = 'TPC-DS Query 96');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 97   *************************************/
 
-    IF @Query = 'TPC-DS Query 97'
-        with ssci as (
+    /*************************************   TPC-DS Query 97   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
+        ;with ssci as (
         select ss_customer_sk customer_sk
               ,ss_item_sk item_sk
         from store_sales,date_dim
@@ -5032,10 +5314,13 @@ order by sum(cr_net_loss) desc
                                        and ssci.item_sk = csci.item_sk)
         OPTION (LABEL = 'TPC-DS Query 97');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 98   *************************************/
 
-    IF @Query = 'TPC-DS Query 98'
+    /*************************************   TPC-DS Query 98   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select i_item_id
               ,i_item_desc 
               ,i_category 
@@ -5068,10 +5353,13 @@ order by sum(cr_net_loss) desc
         ,revenueratio
         OPTION (LABEL = 'TPC-DS Query 98');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
 
-    /*************************************   TPCDS Query 99   *************************************/
 
-    IF @Query = 'TPC-DS Query 99'
+    /*************************************   TPC-DS Query 99   *************************************/
+
+    SET @QueryStartTime = GETDATE()
+
         select top 100 
         substring(w_warehouse_name,1,20) /* substr(w_warehouse_name,1,20) */
           ,sm_type
@@ -5105,42 +5393,13 @@ order by sum(cr_net_loss) desc
                 ,cc_name
         OPTION (LABEL = 'TPC-DS Query 99');
 
+SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query ' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))
+
 
     /*************************************   Query End   *************************************/
 
-    SET @QueryEndTime = GETDATE()
-
-    SET @QueryLog = (SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, @Query AS Query, @QueryStartTime AS QueryStartTime, @QueryEndTime AS QueryEndTime FOR JSON PATH)
+    SELECT @QueryCustomLog
 END
 GO
 
 
-
-        DROP PROCEDURE IF EXISTS dbo.RunBenchmarkSequential
-        GO
-
-        CREATE PROCEDURE dbo.RunBenchmarkSequential
-        AS
-        BEGIN
-
-        DECLARE @Loop			INT = 1
-        DECLARE @QueryCustomLog	NVARCHAR(MAX) = '[]'
-
-        WHILE @Loop <= 22
-        BEGIN
-                
-            DECLARE @QueryLog		VARCHAR(MAX)
-            DECLARE @CurrentQuery 	VARCHAR(20) = 'TPC-H Query ' + RIGHT('00' + CONVERT(VARCHAR(2), @Loop) , 2)
-            
-            EXEC dbo.RunQuery @Query = @CurrentQuery, @QueryLog = @QueryLog OUTPUT
-
-            SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON(@QueryLog)
-
-            SET @Loop = @Loop + 1
-        END
-
-        SELECT @QueryCustomLog AS QueryCustomLog
-
-        END
-        GO
-        

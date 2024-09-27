@@ -1,7 +1,7 @@
 
     /*************************************   Notes   *************************************/
     /*
-        Generated on 2024-09-26
+        Generated on 2024-09-27
         This is the TPC-DS 1000 GB (TB_001) scale factor queries modified for Fabric DW T-SQL syntax.
 
         TPC-DS Parameter Substitution (Version 3.2.0)
@@ -9,9 +9,9 @@
     */
 
 
-    /*************************************   TPCDS Query 01   *************************************/
+    /*************************************   TPC-DS Query 01   *************************************/
 
-        with customer_total_return as
+        ;with customer_total_return as
         (select sr_customer_sk as ctr_customer_sk
         ,sr_store_sk as ctr_store_sk
         ,sum(sr_fee) as ctr_total_return
@@ -35,9 +35,9 @@
         OPTION (LABEL = 'TPC-DS Query 01');
 
 
-    /*************************************   TPCDS Query 02   *************************************/
+    /*************************************   TPC-DS Query 02   *************************************/
 
-        with wscs as
+        ;with wscs as
          (select sold_date_sk
                 ,sales_price
           from (select ws_sold_date_sk sold_date_sk
@@ -97,7 +97,7 @@
         OPTION (LABEL = 'TPC-DS Query 02');
 
 
-    /*************************************   TPCDS Query 03   *************************************/
+    /*************************************   TPC-DS Query 03   *************************************/
 
         select top 100 dt.d_year 
                ,item.i_brand_id brand_id 
@@ -119,9 +119,9 @@
         OPTION (LABEL = 'TPC-DS Query 03');
 
 
-    /*************************************   TPCDS Query 04   *************************************/
+    /*************************************   TPC-DS Query 04   *************************************/
 
-        with year_total as (
+        ;with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
                ,c_last_name customer_last_name
@@ -236,9 +236,9 @@
         OPTION (LABEL = 'TPC-DS Query 04');
 
 
-    /*************************************   TPCDS Query 05   *************************************/
+    /*************************************   TPC-DS Query 05   *************************************/
 
-        with ssr as
+        ;with ssr as
          (select s_store_id,
                 sum(sales_price) as sales,
                 sum(profit) as profit,
@@ -365,7 +365,7 @@
         OPTION (LABEL = 'TPC-DS Query 05');
 
 
-    /*************************************   TPCDS Query 06   *************************************/
+    /*************************************   TPC-DS Query 06   *************************************/
 
         select top 100 a.ca_state state, count(*) cnt
          from customer_address a
@@ -392,7 +392,7 @@
         OPTION (LABEL = 'TPC-DS Query 06');
 
 
-    /*************************************   TPCDS Query 07   *************************************/
+    /*************************************   TPC-DS Query 07   *************************************/
 
         select top 100 i_item_id, 
                 avg(ss_quantity) agg1,
@@ -414,7 +414,7 @@
         OPTION (LABEL = 'TPC-DS Query 07');
 
 
-    /*************************************   TPCDS Query 08   *************************************/
+    /*************************************   TPC-DS Query 08   *************************************/
 
         select top 100 s_store_name
               ,sum(ss_net_profit)
@@ -523,7 +523,7 @@
         OPTION (LABEL = 'TPC-DS Query 08');
 
 
-    /*************************************   TPCDS Query 09   *************************************/
+    /*************************************   TPC-DS Query 09   *************************************/
 
         select case when (select count(*) 
                           from store_sales 
@@ -575,7 +575,7 @@
         OPTION (LABEL = 'TPC-DS Query 09');
 
 
-    /*************************************   TPCDS Query 10   *************************************/
+    /*************************************   TPC-DS Query 10   *************************************/
 
         select top 100 
           cd_gender,
@@ -635,9 +635,9 @@
         OPTION (LABEL = 'TPC-DS Query 10');
 
 
-    /*************************************   TPCDS Query 11   *************************************/
+    /*************************************   TPC-DS Query 11   *************************************/
 
-        with year_total as (
+        ;with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
                ,c_last_name customer_last_name
@@ -717,7 +717,7 @@
         OPTION (LABEL = 'TPC-DS Query 11');
 
 
-    /*************************************   TPCDS Query 12   *************************************/
+    /*************************************   TPC-DS Query 12   *************************************/
 
         select top 100 i_item_id
               ,i_item_desc 
@@ -752,7 +752,7 @@
         OPTION (LABEL = 'TPC-DS Query 12');
 
 
-    /*************************************   TPCDS Query 13   *************************************/
+    /*************************************   TPC-DS Query 13   *************************************/
 
         select avg(ss_quantity)
                ,avg(ss_ext_sales_price)
@@ -805,9 +805,9 @@
         OPTION (LABEL = 'TPC-DS Query 13');
 
 
-    /*************************************   TPCDS Query 14   *************************************/
+    /*************************************   TPC-DS Query 14   *************************************/
 
-        with  cross_items as
+        ;with  cross_items as
          (select i_item_sk ss_item_sk
          from item,
          (select iss.i_brand_id brand_id
@@ -1016,7 +1016,7 @@
         OPTION (LABEL = 'TPC-DS Query 14');
 
 
-    /*************************************   TPCDS Query 15   *************************************/
+    /*************************************   TPC-DS Query 15   *************************************/
 
         select top 100 ca_zip
                ,sum(cs_sales_price)
@@ -1037,7 +1037,7 @@
         OPTION (LABEL = 'TPC-DS Query 15');
 
 
-    /*************************************   TPCDS Query 16   *************************************/
+    /*************************************   TPC-DS Query 16   *************************************/
 
         select top 100 
            count(distinct cs_order_number) as "order count"
@@ -1069,7 +1069,7 @@
         OPTION (LABEL = 'TPC-DS Query 16');
 
 
-    /*************************************   TPCDS Query 17   *************************************/
+    /*************************************   TPC-DS Query 17   *************************************/
 
         select top 100 i_item_id
                ,i_item_desc
@@ -1115,7 +1115,7 @@
         OPTION (LABEL = 'TPC-DS Query 17');
 
 
-    /*************************************   TPCDS Query 18   *************************************/
+    /*************************************   TPC-DS Query 18   *************************************/
 
         select top 100 i_item_id,
                 ca_country,
@@ -1150,7 +1150,7 @@
         OPTION (LABEL = 'TPC-DS Query 18');
 
 
-    /*************************************   TPCDS Query 19   *************************************/
+    /*************************************   TPC-DS Query 19   *************************************/
 
         select top 100 i_brand_id brand_id, i_brand brand, i_manufact_id, i_manufact,
          	sum(ss_ext_sales_price) ext_price
@@ -1176,7 +1176,7 @@
         OPTION (LABEL = 'TPC-DS Query 19');
 
 
-    /*************************************   TPCDS Query 20   *************************************/
+    /*************************************   TPC-DS Query 20   *************************************/
 
         select top 100 i_item_id
                ,i_item_desc 
@@ -1207,7 +1207,7 @@
         OPTION (LABEL = 'TPC-DS Query 20');
 
 
-    /*************************************   TPCDS Query 21   *************************************/
+    /*************************************   TPC-DS Query 21   *************************************/
 
         select top 100 *
          from(select w_warehouse_name
@@ -1238,7 +1238,7 @@
         OPTION (LABEL = 'TPC-DS Query 21');
 
 
-    /*************************************   TPCDS Query 22   *************************************/
+    /*************************************   TPC-DS Query 22   *************************************/
 
         select top 100 i_product_name
                      ,i_brand
@@ -1259,9 +1259,9 @@
         OPTION (LABEL = 'TPC-DS Query 22');
 
 
-    /*************************************   TPCDS Query 23   *************************************/
+    /*************************************   TPC-DS Query 23   *************************************/
 
-        with frequent_ss_items as 
+        ;with frequent_ss_items as
         (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt /* (select substr(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt */
           from store_sales
               ,date_dim 
@@ -1367,9 +1367,9 @@
         OPTION (LABEL = 'TPC-DS Query 23');
 
 
-    /*************************************   TPCDS Query 24   *************************************/
+    /*************************************   TPC-DS Query 24   *************************************/
 
-        with ssales as
+        ;with ssales as
         (select c_last_name
               ,c_first_name
               ,s_store_name
@@ -1475,7 +1475,7 @@
         OPTION (LABEL = 'TPC-DS Query 24');
 
 
-    /*************************************   TPCDS Query 25   *************************************/
+    /*************************************   TPC-DS Query 25   *************************************/
 
         select top 100 
          i_item_id
@@ -1524,7 +1524,7 @@
         OPTION (LABEL = 'TPC-DS Query 25');
 
 
-    /*************************************   TPCDS Query 26   *************************************/
+    /*************************************   TPC-DS Query 26   *************************************/
 
         select top 100 i_item_id, 
                 avg(cs_quantity) agg1,
@@ -1546,7 +1546,7 @@
         OPTION (LABEL = 'TPC-DS Query 26');
 
 
-    /*************************************   TPCDS Query 27   *************************************/
+    /*************************************   TPC-DS Query 27   *************************************/
 
         select top 100 i_item_id,
                 s_state, grouping(s_state) g_state,
@@ -1570,7 +1570,7 @@
         OPTION (LABEL = 'TPC-DS Query 27');
 
 
-    /*************************************   TPCDS Query 28   *************************************/
+    /*************************************   TPC-DS Query 28   *************************************/
 
         select top 100 *
         from (select avg(ss_list_price) B1_LP
@@ -1624,7 +1624,7 @@
         OPTION (LABEL = 'TPC-DS Query 28');
 
 
-    /*************************************   TPCDS Query 29   *************************************/
+    /*************************************   TPC-DS Query 29   *************************************/
 
         select top 100  
              i_item_id
@@ -1672,9 +1672,9 @@
         OPTION (LABEL = 'TPC-DS Query 29');
 
 
-    /*************************************   TPCDS Query 30   *************************************/
+    /*************************************   TPC-DS Query 30   *************************************/
 
-        with customer_total_return as
+        ;with customer_total_return as
          (select wr_returning_customer_sk as ctr_customer_sk
                 ,ca_state as ctr_state, 
          	sum(wr_return_amt) as ctr_total_return
@@ -1704,9 +1704,9 @@
         OPTION (LABEL = 'TPC-DS Query 30');
 
 
-    /*************************************   TPCDS Query 31   *************************************/
+    /*************************************   TPC-DS Query 31   *************************************/
 
-        with ss as
+        ;with ss as
          (select ca_county,d_qoy, d_year,sum(ss_ext_sales_price) as store_sales
          from store_sales,date_dim,customer_address
          where ss_sold_date_sk = d_date_sk
@@ -1758,7 +1758,7 @@
         OPTION (LABEL = 'TPC-DS Query 31');
 
 
-    /*************************************   TPCDS Query 32   *************************************/
+    /*************************************   TPC-DS Query 32   *************************************/
 
         select top 100 sum(cs_ext_discount_amt)  as "excess discount amount" 
         from 
@@ -1787,9 +1787,9 @@
         OPTION (LABEL = 'TPC-DS Query 32');
 
 
-    /*************************************   TPCDS Query 33   *************************************/
+    /*************************************   TPC-DS Query 33   *************************************/
 
-        with ss as (
+        ;with ss as (
          select
                   i_manufact_id,sum(ss_ext_sales_price) total_sales
          from
@@ -1863,7 +1863,7 @@
         OPTION (LABEL = 'TPC-DS Query 33');
 
 
-    /*************************************   TPCDS Query 34   *************************************/
+    /*************************************   TPC-DS Query 34   *************************************/
 
         select c_last_name
                ,c_first_name
@@ -1896,7 +1896,7 @@
         OPTION (LABEL = 'TPC-DS Query 34');
 
 
-    /*************************************   TPCDS Query 35   *************************************/
+    /*************************************   TPC-DS Query 35   *************************************/
 
         select top 100  
           ca_state,
@@ -1955,7 +1955,7 @@
         OPTION (LABEL = 'TPC-DS Query 35');
 
 
-    /*************************************   TPCDS Query 36   *************************************/
+    /*************************************   TPC-DS Query 36   *************************************/
 
         select top 100 
             sum(ss_net_profit)/sum(ss_ext_sales_price) as gross_margin
@@ -1986,7 +1986,7 @@
         OPTION (LABEL = 'TPC-DS Query 36');
 
 
-    /*************************************   TPCDS Query 37   *************************************/
+    /*************************************   TPC-DS Query 37   *************************************/
 
         select top 100 i_item_id
                ,i_item_desc
@@ -2004,7 +2004,7 @@
         OPTION (LABEL = 'TPC-DS Query 37');
 
 
-    /*************************************   TPCDS Query 38   *************************************/
+    /*************************************   TPC-DS Query 38   *************************************/
 
         select top 100 count(*) from (
             select distinct c_last_name, c_first_name, d_date
@@ -2028,9 +2028,9 @@
         OPTION (LABEL = 'TPC-DS Query 38');
 
 
-    /*************************************   TPCDS Query 39   *************************************/
+    /*************************************   TPC-DS Query 39   *************************************/
 
-        with inv as
+        ;with inv as
         (select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy
                ,stdev,mean, case mean when 0 then null else stdev/mean end cov
          from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy
@@ -2083,7 +2083,7 @@
         OPTION (LABEL = 'TPC-DS Query 39');
 
 
-    /*************************************   TPCDS Query 40   *************************************/
+    /*************************************   TPC-DS Query 40   *************************************/
 
         select top 100 
            w_state
@@ -2112,7 +2112,7 @@
         OPTION (LABEL = 'TPC-DS Query 40');
 
 
-    /*************************************   TPCDS Query 41   *************************************/
+    /*************************************   TPC-DS Query 41   *************************************/
 
         select distinct top 100 (i_product_name) /* select top 100 distinct(i_product_name) */
          from item i1
@@ -2165,7 +2165,7 @@
         OPTION (LABEL = 'TPC-DS Query 41');
 
 
-    /*************************************   TPCDS Query 42   *************************************/
+    /*************************************   TPC-DS Query 42   *************************************/
 
         select top 100 dt.d_year
          	,item.i_category_id
@@ -2188,7 +2188,7 @@
         OPTION (LABEL = 'TPC-DS Query 42');
 
 
-    /*************************************   TPCDS Query 43   *************************************/
+    /*************************************   TPC-DS Query 43   *************************************/
 
         select top 100 s_store_name, s_store_id,
                 sum(case when (d_day_name='Sunday') then ss_sales_price else null end) sun_sales,
@@ -2208,7 +2208,7 @@
         OPTION (LABEL = 'TPC-DS Query 43');
 
 
-    /*************************************   TPCDS Query 44   *************************************/
+    /*************************************   TPC-DS Query 44   *************************************/
 
         select top 100 asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing
         from(select *
@@ -2244,7 +2244,7 @@
         OPTION (LABEL = 'TPC-DS Query 44');
 
 
-    /*************************************   TPCDS Query 45   *************************************/
+    /*************************************   TPC-DS Query 45   *************************************/
 
         select top 100 ca_zip, ca_city, sum(ws_sales_price)
          from web_sales, customer, customer_address, date_dim, item
@@ -2265,7 +2265,7 @@
         OPTION (LABEL = 'TPC-DS Query 45');
 
 
-    /*************************************   TPCDS Query 46   *************************************/
+    /*************************************   TPC-DS Query 46   *************************************/
 
         select top 100 c_last_name
                ,c_first_name
@@ -2301,9 +2301,9 @@
         OPTION (LABEL = 'TPC-DS Query 46');
 
 
-    /*************************************   TPCDS Query 47   *************************************/
+    /*************************************   TPC-DS Query 47   *************************************/
 
-        with v1 as(
+        ;with v1 as(
          select i_category, i_brand,
                 s_store_name, s_company_name,
                 d_year, d_moy,
@@ -2353,7 +2353,7 @@
         OPTION (LABEL = 'TPC-DS Query 47');
 
 
-    /*************************************   TPCDS Query 48   *************************************/
+    /*************************************   TPC-DS Query 48   *************************************/
 
         select sum (ss_quantity)
          from store_sales, store, customer_demographics, customer_address, date_dim
@@ -2421,7 +2421,7 @@
         OPTION (LABEL = 'TPC-DS Query 48');
 
 
-    /*************************************   TPCDS Query 49   *************************************/
+    /*************************************   TPC-DS Query 49   *************************************/
 
         select top 100 channel, item, return_ratio, return_rank, currency_rank from
          (select
@@ -2551,7 +2551,7 @@
         OPTION (LABEL = 'TPC-DS Query 49');
 
 
-    /*************************************   TPCDS Query 50   *************************************/
+    /*************************************   TPC-DS Query 50   *************************************/
 
         select top 100 
            s_store_name
@@ -2611,9 +2611,9 @@
         OPTION (LABEL = 'TPC-DS Query 50');
 
 
-    /*************************************   TPCDS Query 51   *************************************/
+    /*************************************   TPC-DS Query 51   *************************************/
 
-        WITH web_v1 as (
+        ;WITH web_v1 as (
         select
           ws_item_sk item_sk, d_date,
           sum(sum(ws_sales_price))
@@ -2657,7 +2657,7 @@
         OPTION (LABEL = 'TPC-DS Query 51');
 
 
-    /*************************************   TPCDS Query 52   *************************************/
+    /*************************************   TPC-DS Query 52   *************************************/
 
         select top 100 dt.d_year
          	,item.i_brand_id brand_id
@@ -2680,7 +2680,7 @@
         OPTION (LABEL = 'TPC-DS Query 52');
 
 
-    /*************************************   TPCDS Query 53   *************************************/
+    /*************************************   TPC-DS Query 53   *************************************/
 
         select top 100 * from 
         (select i_manufact_id,
@@ -2709,9 +2709,9 @@
         OPTION (LABEL = 'TPC-DS Query 53');
 
 
-    /*************************************   TPCDS Query 54   *************************************/
+    /*************************************   TPC-DS Query 54   *************************************/
 
-        with my_customers as (
+        ;with my_customers as (
          select distinct c_customer_sk
                 , c_current_addr_sk
          from   
@@ -2766,7 +2766,7 @@
         OPTION (LABEL = 'TPC-DS Query 54');
 
 
-    /*************************************   TPCDS Query 55   *************************************/
+    /*************************************   TPC-DS Query 55   *************************************/
 
         select top 100 i_brand_id brand_id, i_brand brand,
          	sum(ss_ext_sales_price) ext_price
@@ -2781,9 +2781,9 @@
         OPTION (LABEL = 'TPC-DS Query 55');
 
 
-    /*************************************   TPCDS Query 56   *************************************/
+    /*************************************   TPC-DS Query 56   *************************************/
 
-        with ss as (
+        ;with ss as (
          select i_item_id,sum(ss_ext_sales_price) total_sales
          from
          	store_sales,
@@ -2851,9 +2851,9 @@
         OPTION (LABEL = 'TPC-DS Query 56');
 
 
-    /*************************************   TPCDS Query 57   *************************************/
+    /*************************************   TPC-DS Query 57   *************************************/
 
-        with v1 as(
+        ;with v1 as(
          select i_category, i_brand,
                 cc_name,
                 d_year, d_moy,
@@ -2900,9 +2900,9 @@
         OPTION (LABEL = 'TPC-DS Query 57');
 
 
-    /*************************************   TPCDS Query 58   *************************************/
+    /*************************************   TPC-DS Query 58   *************************************/
 
-        with ss_items as
+        ;with ss_items as
          (select i_item_id item_id
                 ,sum(ss_ext_sales_price) ss_item_rev 
          from store_sales
@@ -2966,9 +2966,9 @@
         OPTION (LABEL = 'TPC-DS Query 58');
 
 
-    /*************************************   TPCDS Query 59   *************************************/
+    /*************************************   TPC-DS Query 59   *************************************/
 
-        with wss as 
+        ;with wss as
          (select d_week_seq,
                 ss_store_sk,
                 sum(case when (d_day_name='Sunday') then ss_sales_price else null end) sun_sales,
@@ -3011,9 +3011,9 @@
         OPTION (LABEL = 'TPC-DS Query 59');
 
 
-    /*************************************   TPCDS Query 60   *************************************/
+    /*************************************   TPC-DS Query 60   *************************************/
 
-        with ss as (
+        ;with ss as (
          select
                   i_item_id,sum(ss_ext_sales_price) total_sales
          from
@@ -3090,7 +3090,7 @@
         OPTION (LABEL = 'TPC-DS Query 60');
 
 
-    /*************************************   TPCDS Query 61   *************************************/
+    /*************************************   TPC-DS Query 61   *************************************/
 
         select top 100 promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100
         from
@@ -3135,7 +3135,7 @@
         OPTION (LABEL = 'TPC-DS Query 61');
 
 
-    /*************************************   TPCDS Query 62   *************************************/
+    /*************************************   TPC-DS Query 62   *************************************/
 
         select top 100 
         substring(w_warehouse_name,1,20) /* substr(w_warehouse_name,1,20) */
@@ -3171,7 +3171,7 @@
         OPTION (LABEL = 'TPC-DS Query 62');
 
 
-    /*************************************   TPCDS Query 63   *************************************/
+    /*************************************   TPC-DS Query 63   *************************************/
 
         select top 100 * 
         from (select i_manager_id
@@ -3201,9 +3201,9 @@
         OPTION (LABEL = 'TPC-DS Query 63');
 
 
-    /*************************************   TPCDS Query 64   *************************************/
+    /*************************************   TPC-DS Query 64   *************************************/
 
-        with cs_ui as
+        ;with cs_ui as
          (select cs_item_sk
                 ,sum(cs_ext_list_price) as sale,sum(cr_refunded_cash+cr_reversed_charge+cr_store_credit) as refund
           from catalog_sales
@@ -3324,7 +3324,7 @@
         OPTION (LABEL = 'TPC-DS Query 64');
 
 
-    /*************************************   TPCDS Query 65   *************************************/
+    /*************************************   TPC-DS Query 65   *************************************/
 
         select top 100
         	s_store_name,
@@ -3354,7 +3354,7 @@
         OPTION (LABEL = 'TPC-DS Query 65');
 
 
-    /*************************************   TPCDS Query 66   *************************************/
+    /*************************************   TPC-DS Query 66   *************************************/
 
         select top 100  
                  w_warehouse_name
@@ -3575,7 +3575,7 @@
         OPTION (LABEL = 'TPC-DS Query 66');
 
 
-    /*************************************   TPCDS Query 67   *************************************/
+    /*************************************   TPC-DS Query 67   *************************************/
 
         select top 100 *
         from (select i_category
@@ -3620,7 +3620,7 @@
         OPTION (LABEL = 'TPC-DS Query 67');
 
 
-    /*************************************   TPCDS Query 68   *************************************/
+    /*************************************   TPC-DS Query 68   *************************************/
 
         select top 100 c_last_name
                ,c_first_name
@@ -3663,7 +3663,7 @@
         OPTION (LABEL = 'TPC-DS Query 68');
 
 
-    /*************************************   TPCDS Query 69   *************************************/
+    /*************************************   TPC-DS Query 69   *************************************/
 
         select top 100 
           cd_gender,
@@ -3711,7 +3711,7 @@
         OPTION (LABEL = 'TPC-DS Query 69');
 
 
-    /*************************************   TPCDS Query 70   *************************************/
+    /*************************************   TPC-DS Query 70   *************************************/
 
         select top 100 
             sum(ss_net_profit) as total_sum
@@ -3750,7 +3750,7 @@
         OPTION (LABEL = 'TPC-DS Query 70');
 
 
-    /*************************************   TPCDS Query 71   *************************************/
+    /*************************************   TPC-DS Query 71   *************************************/
 
         select i_brand_id brand_id, i_brand brand,t_hour,t_minute,
          	sum(ext_price) ext_price
@@ -3791,7 +3791,7 @@
         OPTION (LABEL = 'TPC-DS Query 71');
 
 
-    /*************************************   TPCDS Query 72   *************************************/
+    /*************************************   TPC-DS Query 72   *************************************/
 
         select top 100 i_item_desc
               ,w_warehouse_name
@@ -3821,7 +3821,7 @@
         OPTION (LABEL = 'TPC-DS Query 72');
 
 
-    /*************************************   TPCDS Query 73   *************************************/
+    /*************************************   TPC-DS Query 73   *************************************/
 
         select c_last_name
                ,c_first_name
@@ -3851,9 +3851,9 @@
         OPTION (LABEL = 'TPC-DS Query 73');
 
 
-    /*************************************   TPCDS Query 74   *************************************/
+    /*************************************   TPC-DS Query 74   *************************************/
 
-        with year_total as (
+        ;with year_total as (
          select c_customer_id customer_id
                ,c_first_name customer_first_name
                ,c_last_name customer_last_name
@@ -3913,9 +3913,9 @@
         OPTION (LABEL = 'TPC-DS Query 74');
 
 
-    /*************************************   TPCDS Query 75   *************************************/
+    /*************************************   TPC-DS Query 75   *************************************/
 
-        WITH all_sales AS (
+        ;WITH all_sales AS (
          SELECT d_year
                ,i_brand_id
                ,i_class_id
@@ -3984,7 +3984,7 @@
         OPTION (LABEL = 'TPC-DS Query 75');
 
 
-    /*************************************   TPCDS Query 76   *************************************/
+    /*************************************   TPC-DS Query 76   *************************************/
 
         select top 100 channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (
                 SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price
@@ -4009,9 +4009,9 @@
         OPTION (LABEL = 'TPC-DS Query 76');
 
 
-    /*************************************   TPCDS Query 77   *************************************/
+    /*************************************   TPC-DS Query 77   *************************************/
 
-        with ss as
+        ;with ss as
          (select s_store_sk,
                  sum(ss_ext_sales_price) as sales,
                  sum(ss_net_profit) as profit
@@ -4118,9 +4118,9 @@
         OPTION (LABEL = 'TPC-DS Query 77');
 
 
-    /*************************************   TPCDS Query 78   *************************************/
+    /*************************************   TPC-DS Query 78   *************************************/
 
-        with ws as
+        ;with ws as
           (select d_year AS ws_sold_year, ws_item_sk,
             ws_bill_customer_sk ws_customer_sk,
             sum(ws_quantity) ws_qty,
@@ -4177,7 +4177,7 @@
         OPTION (LABEL = 'TPC-DS Query 78');
 
 
-    /*************************************   TPCDS Query 79   *************************************/
+    /*************************************   TPC-DS Query 79   *************************************/
 
         select top 100
         c_last_name,c_first_name,substring(s_city,1,30),ss_ticket_number,amt,profit /* c_last_name,c_first_name,substr(s_city,1,30),ss_ticket_number,amt,profit */
@@ -4201,9 +4201,9 @@
         OPTION (LABEL = 'TPC-DS Query 79');
 
 
-    /*************************************   TPCDS Query 80   *************************************/
+    /*************************************   TPC-DS Query 80   *************************************/
 
-        with ssr as
+        ;with ssr as
          (select  s_store_id as store_id,
                   sum(ss_ext_sales_price) as sales,
                   sum(coalesce(sr_return_amt, 0)) as returns,
@@ -4298,9 +4298,9 @@
         OPTION (LABEL = 'TPC-DS Query 80');
 
 
-    /*************************************   TPCDS Query 81   *************************************/
+    /*************************************   TPC-DS Query 81   *************************************/
 
-        with customer_total_return as
+        ;with customer_total_return as
          (select cr_returning_customer_sk as ctr_customer_sk
                 ,ca_state as ctr_state, 
          	sum(cr_return_amt_inc_tax) as ctr_total_return
@@ -4330,7 +4330,7 @@
         OPTION (LABEL = 'TPC-DS Query 81');
 
 
-    /*************************************   TPCDS Query 82   *************************************/
+    /*************************************   TPC-DS Query 82   *************************************/
 
         select top 100 i_item_id
                ,i_item_desc
@@ -4348,9 +4348,9 @@
         OPTION (LABEL = 'TPC-DS Query 82');
 
 
-    /*************************************   TPCDS Query 83   *************************************/
+    /*************************************   TPC-DS Query 83   *************************************/
 
-        with sr_items as
+        ;with sr_items as
          (select i_item_id item_id,
                 sum(sr_return_quantity) sr_item_qty
          from store_returns,
@@ -4416,7 +4416,7 @@
         OPTION (LABEL = 'TPC-DS Query 83');
 
 
-    /*************************************   TPCDS Query 84   *************************************/
+    /*************************************   TPC-DS Query 84   *************************************/
 
         select top 100 c_customer_id as customer_id
                , coalesce(c_last_name,'')  +  ', '  +  coalesce(c_first_name,'') as customername /*  , coalesce(c_last_name,'') || ', ' || coalesce(c_first_name,'') as customername  */
@@ -4438,7 +4438,7 @@
         OPTION (LABEL = 'TPC-DS Query 84');
 
 
-    /*************************************   TPCDS Query 85   *************************************/
+    /*************************************   TPC-DS Query 85   *************************************/
 
         select top 100 substring(r_reason_desc,1,20) /* select top 100 substr(r_reason_desc,1,20) */
                ,avg(ws_quantity)
@@ -4523,7 +4523,7 @@
         OPTION (LABEL = 'TPC-DS Query 85');
 
 
-    /*************************************   TPCDS Query 86   *************************************/
+    /*************************************   TPC-DS Query 86   *************************************/
 
         select top 100  
             sum(ws_net_paid) as total_sum
@@ -4550,7 +4550,7 @@
         OPTION (LABEL = 'TPC-DS Query 86');
 
 
-    /*************************************   TPCDS Query 87   *************************************/
+    /*************************************   TPC-DS Query 87   *************************************/
 
         select count(*) 
         from ((select distinct c_last_name, c_first_name, d_date
@@ -4574,7 +4574,7 @@
         OPTION (LABEL = 'TPC-DS Query 87');
 
 
-    /*************************************   TPCDS Query 88   *************************************/
+    /*************************************   TPC-DS Query 88   *************************************/
 
         select  *
         from
@@ -4669,7 +4669,7 @@
         OPTION (LABEL = 'TPC-DS Query 88');
 
 
-    /*************************************   TPCDS Query 89   *************************************/
+    /*************************************   TPC-DS Query 89   *************************************/
 
         select top 100 *
         from(
@@ -4698,7 +4698,7 @@
         OPTION (LABEL = 'TPC-DS Query 89');
 
 
-    /*************************************   TPCDS Query 90   *************************************/
+    /*************************************   TPC-DS Query 90   *************************************/
 
         select top 100 cast(amc as decimal(15,4))/cast(pmc as decimal(15,4)) am_pm_ratio
          from ( select count(*) amc
@@ -4721,7 +4721,7 @@
         OPTION (LABEL = 'TPC-DS Query 90');
 
 
-    /*************************************   TPCDS Query 91   *************************************/
+    /*************************************   TPC-DS Query 91   *************************************/
 
         select  
                 cc_call_center_id Call_Center,
@@ -4754,7 +4754,7 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 91');
 
 
-    /*************************************   TPCDS Query 92   *************************************/
+    /*************************************   TPC-DS Query 92   *************************************/
 
         select top 100 
            sum(ws_ext_discount_amt)  as "Excess Discount Amount" 
@@ -4785,7 +4785,7 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 92');
 
 
-    /*************************************   TPCDS Query 93   *************************************/
+    /*************************************   TPC-DS Query 93   *************************************/
 
         select top 100 ss_customer_sk
                     ,sum(act_sales) sumsales
@@ -4804,7 +4804,7 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 93');
 
 
-    /*************************************   TPCDS Query 94   *************************************/
+    /*************************************   TPC-DS Query 94   *************************************/
 
         select top 100 
            count(distinct ws_order_number) as "order count"
@@ -4834,9 +4834,9 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 94');
 
 
-    /*************************************   TPCDS Query 95   *************************************/
+    /*************************************   TPC-DS Query 95   *************************************/
 
-        with ws_wh as
+        ;with ws_wh as
         (select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2
          from web_sales ws1,web_sales ws2
          where ws1.ws_order_number = ws2.ws_order_number
@@ -4867,7 +4867,7 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 95');
 
 
-    /*************************************   TPCDS Query 96   *************************************/
+    /*************************************   TPC-DS Query 96   *************************************/
 
         select top 100 count(*) 
         from store_sales
@@ -4884,9 +4884,9 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 96');
 
 
-    /*************************************   TPCDS Query 97   *************************************/
+    /*************************************   TPC-DS Query 97   *************************************/
 
-        with ssci as (
+        ;with ssci as (
         select ss_customer_sk customer_sk
               ,ss_item_sk item_sk
         from store_sales,date_dim
@@ -4910,7 +4910,7 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 97');
 
 
-    /*************************************   TPCDS Query 98   *************************************/
+    /*************************************   TPC-DS Query 98   *************************************/
 
         select i_item_id
               ,i_item_desc 
@@ -4945,7 +4945,7 @@ order by sum(cr_net_loss) desc
         OPTION (LABEL = 'TPC-DS Query 98');
 
 
-    /*************************************   TPCDS Query 99   *************************************/
+    /*************************************   TPC-DS Query 99   *************************************/
 
         select top 100 
         substring(w_warehouse_name,1,20) /* substr(w_warehouse_name,1,20) */

@@ -150,11 +150,12 @@ function Invoke-dsqgen {
         "GO" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
         "CREATE PROCEDURE dbo.RunQuery"  | Out-File -FilePath $OutputFile -Append
+        "    @Query                  NVARCHAR(20)," | Out-File -FilePath $OutputFile -Append
         "    @Dataset                NVARCHAR(50)     = 'TPC-DS'," | Out-File -FilePath $OutputFile -Append
         "    @DataSize               NVARCHAR(50)     = '{0}'," -f $DataSize | Out-File -FilePath $OutputFile -Append
         "    @Seed                   NVARCHAR(50)     = '{0}'," -f $SeedValue | Out-File -FilePath $OutputFile -Append
         "    @AdditionalInformation  NVARCHAR(MAX)    = NULL," | Out-File -FilePath $OutputFile -Append
-        "    @QueryCustomLog         NVARCHAR(MAX)    = '[]' OUTPUT" | Out-File -FilePath $OutputFile -Append
+        "    @QueryLog               NVARCHAR(MAX)    OUTPUT" | Out-File -FilePath $OutputFile -Append
         "AS" | Out-File -FilePath $OutputFile -Append
         "BEGIN" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
@@ -176,7 +177,13 @@ function Invoke-dsqgen {
         "    /* Create the variables for runtime. */" | Out-File -FilePath $OutputFile -Append
         "    DECLARE @QueryStartTime    DATETIME2(6)" | Out-File -FilePath $OutputFile -Append
         "    DECLARE @QueryEndTime      DATETIME2(6)" | Out-File -FilePath $OutputFile -Append
-        "    DECLARE @SessionID         INT = @@SPID" | Out-File -FilePath $OutputFile -Append
+        "    DECLARE @SessionID         INT" | Out-File -FilePath $OutputFile -Append
+        "" | Out-File -FilePath $OutputFile -Append
+        "" | Out-File -FilePath $OutputFile -Append
+        "    /*************************************   Query Start   *************************************/" | Out-File -FilePath $OutputFile -Append
+        "" | Out-File -FilePath $OutputFile -Append
+        "    SET @SessionID         = @@SPID" | Out-File -FilePath $OutputFile -Append
+        "    SET @QueryStartTime    = GETDATE()" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
     }
@@ -202,21 +209,15 @@ function Invoke-dsqgen {
             }
         }
 
-        ("    /*************************************   TPC-DS Query {0}   *************************************/" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
+        ("    /*************************************   TPCDS Query {0}   *************************************/" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
         ("" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
         if($GenerateAsStoredProcedure) {
-            "    SET @QueryStartTime = GETDATE()" | Out-File -FilePath $OutputFile -Append
-            "" | Out-File -FilePath $OutputFile -Append
+            ("    IF @Query = 'TPC-DS Query {0}'" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
         }
 
         # Append the query to the output file.
         $LineCount = 1
         foreach ($Line in $FileContent) {
-            # Handle a CTE as the first item in a query.
-            if($Line.Trim() -like "with*" -and $LineCount -eq 1) {
-                $Line = ";{0}" -f $Line.Trim()
-            }
-            
             # Handle syntax differences for SQL Server.            
             # Handle substring syntax.
             if($Line -like "*substr(*") {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("substr(", "substring("))}
@@ -283,11 +284,6 @@ function Invoke-dsqgen {
             $LineCount ++
         }
 
-        if($GenerateAsStoredProcedure) {
-            "" | Out-File -FilePath $OutputFile -Append
-            "SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query {0}' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))" -f $QueryName | Out-File -FilePath $OutputFile -Append
-        }
-
         # Add two empty lines before the next query.
         ("" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
         ("" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
@@ -296,11 +292,45 @@ function Invoke-dsqgen {
     if($GenerateAsStoredProcedure) {
         "    /*************************************   Query End   *************************************/" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
-        "    SELECT @QueryCustomLog" | Out-File -FilePath $OutputFile -Append
+        "    SET @QueryEndTime = GETDATE()" | Out-File -FilePath $OutputFile -Append
+        "" | Out-File -FilePath $OutputFile -Append
+        "    SET @QueryLog = (SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, @Query AS Query, @QueryStartTime AS QueryStartTime, @QueryEndTime AS QueryEndTime FOR JSON PATH)" | Out-File -FilePath $OutputFile -Append
         "END" | Out-File -FilePath $OutputFile -Append
         "GO" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
+    }
+
+    # Create the additional procedures that will loop over and call the query procedure.
+    if($GenerateAsStoredProcedure) {"
+        DROP PROCEDURE IF EXISTS dbo.RunBenchmarkSequential
+        GO
+
+        CREATE PROCEDURE dbo.RunBenchmarkSequential
+        AS
+        BEGIN
+
+        DECLARE @Loop			INT = 1
+        DECLARE @QueryCustomLog	NVARCHAR(MAX) = '[]'
+
+        WHILE @Loop <= 22
+        BEGIN
+                
+            DECLARE @QueryLog		VARCHAR(MAX)
+            DECLARE @CurrentQuery 	VARCHAR(20) = 'TPC-H Query ' + RIGHT('00' + CONVERT(VARCHAR(2), @Loop) , 2)
+            
+            EXEC dbo.RunQuery @Query = @CurrentQuery, @QueryLog = @QueryLog OUTPUT
+
+            SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON(@QueryLog)
+
+            SET @Loop = @Loop + 1
+        END
+
+        SELECT @QueryCustomLog AS QueryCustomLog
+
+        END
+        GO
+        " | Out-File -FilePath $OutputFile -Append
     }
 
     # Remove the query_0 file when the process is complete. 
