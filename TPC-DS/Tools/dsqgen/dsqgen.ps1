@@ -1,8 +1,8 @@
 # qgen parameters.
 $dsqgenDirectory            = "C:\GitHub\sample-data\TPC-DS\Tools\dsqgen"   # Directory where dsqgen.exe, tpcds.idx, and the template files are stored.
-$OutputDirectory            = "C:\GitHub\sample-data\TPC-DS"                # Directory where the generated queries will be stored.
+$OutputDirectory            = "C:\GitHub\sample-data\TPC-DS\Queries"                # Directory where the generated queries will be stored.
 $SeedValue                  = 081310311                                     # Seed value for the random number generator. According to the spec this values should be the time stamp of the end of the database load time expressed in the format mmddhhmmss where mm is the month, dd the day, hh the hour, mm the minutes and ss the seconds.
-$GenerateAsStoredProcedure  = $false
+$GenerateOneFilePerQuery    = $true
 
 # Which scale factors should be generated?
 $GB_001 = $true
@@ -17,26 +17,30 @@ $TB_100 = $true
 # Change to the directory that contains qgen.
 Set-Location $dsqgenDirectory
 
-# Create the output directory if it does not exist.
-if (!(Test-Path $OutputDirectory)) {
-    New-Item -ItemType Directory -Path $OutputDirectory
-}
-
 # Store the full location of qgen.exe.
 $dsqgen = Join-Path -Path $dsqgenDirectory -ChildPath "dsqgen.exe"
 
 clear-host
 function Invoke-dsqgen {
     param (
-        [string]$OutputDirectory,    
-        [string]$OutputFile,
+        [string]$OutputDirectory,
         [string]$DataSize,
         [int]$ScaleFactor,
         [string]$SeedValue,
-        [boolean]$GenerateAsStoredProcedure
+        [boolean]$GenerateOneFilePerQuery
     )
 
-    Write-Host ("Generating file {0}" -f $OutputFile)
+    # Create the output directory if it does not exist.
+    $OutputDirectory = Join-Path -Path $OutputDirectory -ChildPath ("{0} - {1}" -f $DataSize, $SeedValue)
+    if (!(Test-Path $OutputDirectory)) {
+        $null = New-Item -ItemType Directory -Path $OutputDirectory
+    }
+
+    Write-Host ("Generating files in {0}" -f $OutputDirectory)
+    switch ($GenerateOneFilePerQuery) {
+        $true {Write-Host "Generating one file per query."}
+        $false {Write-Host "Generating one file containing all queries."}
+    }
 
     # Generate a hashtable with all the queries that need to be generated.
     $QueryList = [ordered]@{
@@ -141,54 +145,39 @@ function Invoke-dsqgen {
         "99" = "query99.tpl"
     }
 
-    # Initiate the output file.
-    "" | Out-File -FilePath $OutputFile
-
-
-    if($GenerateAsStoredProcedure) {
-        "DROP PROCEDURE IF EXISTS dbo.RunQuery" | Out-File -FilePath $OutputFile -Append
-        "GO" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-        "CREATE PROCEDURE dbo.RunQuery"  | Out-File -FilePath $OutputFile -Append
-        "    @Dataset                NVARCHAR(50)     = 'TPC-DS'," | Out-File -FilePath $OutputFile -Append
-        "    @DataSize               NVARCHAR(50)     = '{0}'," -f $DataSize | Out-File -FilePath $OutputFile -Append
-        "    @Seed                   NVARCHAR(50)     = '{0}'," -f $SeedValue | Out-File -FilePath $OutputFile -Append
-        "    @AdditionalInformation  NVARCHAR(MAX)    = NULL," | Out-File -FilePath $OutputFile -Append
-        "    @QueryCustomLog         NVARCHAR(MAX)    = '[]' OUTPUT" | Out-File -FilePath $OutputFile -Append
-        "AS" | Out-File -FilePath $OutputFile -Append
-        "BEGIN" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-    }
-            
-    "    /*************************************   Notes   *************************************/" | Out-File -FilePath $OutputFile -Append
-    "    /*" | Out-File -FilePath $OutputFile -Append
-    "        Generated on {0}" -f (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd") | Out-File -FilePath $OutputFile -Append
-    "        This is the TPC-DS {0} GB ({1}) scale factor queries modified for Fabric DW T-SQL syntax." -f $ScaleFactor, $DataSize | Out-File -FilePath $OutputFile -Append
-    "" | Out-File -FilePath $OutputFile -Append 
-    "        TPC-DS Parameter Substitution (Version 3.2.0)" | Out-File -FilePath $OutputFile -Append
-    "        Using {0} as a seed to the RNG" -f $SeedValue | Out-File -FilePath $OutputFile -Append
-    "    */" | Out-File -FilePath $OutputFile -Append
-    "" | Out-File -FilePath $OutputFile -Append
-    "" | Out-File -FilePath $OutputFile -Append
+    $FileHeader = 
+        "/*************************************   Notes   *************************************/`r`n" + 
+        "/*`r`n" + 
+        "    Generated on {0}`r`n" -f (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd") + 
+        "    This is the TPC-DS {0} GB ({1}) scale factor queries modified for Fabric DW T-SQL syntax.`r`n" -f $ScaleFactor, $DataSize + 
+        "`r`n" + 
+        "    TPC-DS Parameter Substitution (Version 3.2.0)`r`n" + 
+        "    Using {0} as a seed to the RNG`r`n" -f $SeedValue + 
+        "*/`r`n" + 
+        "`r`n" + 
+        "`r`n"
        
-    if($GenerateAsStoredProcedure) {
-        "    /*************************************   Variables   *************************************/" | Out-File -FilePath $OutputFile -Append
-        "    /* Create the variables for runtime. */" | Out-File -FilePath $OutputFile -Append
-        "    DECLARE @QueryStartTime    DATETIME2(6)" | Out-File -FilePath $OutputFile -Append
-        "    DECLARE @QueryEndTime      DATETIME2(6)" | Out-File -FilePath $OutputFile -Append
-        "    DECLARE @SessionID         INT = @@SPID" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
+    if($false -eq $GenerateOneFilePerQuery) {
+        $OutputFile = Join-Path -Path $OutputDirectory -ChildPath ("Queries.sql")
+
+        # Initiate the output file.
+        $FileHeader | Out-File -FilePath $OutputFile
     }
 
     # Loop over the queries, generate the file, cleanup, and write the text to the final output file.
     foreach ($Query in $QueryList.GetEnumerator()) {
         do {
             # Generate the query.
-            & $dsqgen -directory . -input templates.lst -dialect sqlserver -scale $ScaleFactor -output_dir "$OutputDirectory" -template $Query.Value -RNGSEED $SeedValue > $null 2>&1
+            & $dsqgen -directory . -input templates.lst -dialect sqlserver -scale $ScaleFactor -output_dir . -template $Query.Value -RNGSEED $SeedValue > $null 2>&1
 
             # Read the file.
-            $File = (Get-Content -Path (Join-Path -Path $OutputDirectory -ChildPath "query_0.sql"))
+            $File = (Get-Content -Path "query_0.sql")
+
+            # If the file is empty, remove it.
+            if($File.Count -eq 0) {
+                # Write-Host  "Failure generating query."
+                Remove-Item -Path "query_0.sql"
+            }
         } while (
             # If the file does not contain any text, then regenerate the file again.
             $File.Count -eq 0
@@ -202,12 +191,13 @@ function Invoke-dsqgen {
             }
         }
 
-        ("    /*************************************   TPC-DS Query {0}   *************************************/" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
-        ("" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
-        if($GenerateAsStoredProcedure) {
-            "    SET @QueryStartTime = GETDATE()" | Out-File -FilePath $OutputFile -Append
-            "" | Out-File -FilePath $OutputFile -Append
+        if($true -eq $GenerateOneFilePerQuery -and $File.Query -notin (15.2, 15.3)) {
+            $OutputFile = Join-Path -Path $OutputDirectory -ChildPath ("Query {0}.sql" -f $Query.Name)
+            $FileHeader | Out-File -FilePath $OutputFile
         }
+
+        ("    /*************************************   TPC-DS Query {0}   *************************************/" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
+        "" | Out-File -FilePath $OutputFile -Append
 
         # Append the query to the output file.
         $LineCount = 1
@@ -253,6 +243,7 @@ function Invoke-dsqgen {
             if ($Query.Name -eq "05" -and $LineCount -eq 102) {$Line = "{1} /* {0} */" -f $Line.Trim(), (", 'store' + s_store_id as id")}
             if ($Query.Name -eq "05" -and $LineCount -eq 109) {$Line = "{1} /* {0} */" -f $Line.Trim(), (", 'catalog_page' + cp_catalog_page_id as id")}
             if ($Query.Name -eq "05" -and $LineCount -eq 116) {$Line = "{1} /* {0} */" -f $Line.Trim(), (", 'web_site' + web_site_id as id")}
+            if ($Query.Name -eq "06" -and $LineCount -eq 1)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count", "count_big"))}
             if ($Query.Name -eq "14" -and $LineCount -eq 32)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("{0} AS x" -f $Line.Trim())}
             if ($Query.Name -eq "23" -and $LineCount -eq 20)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("group by c_customer_sk) AS x),")}
             if ($Query.Name -eq "23" -and $LineCount -eq 48)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) AS x")}
@@ -283,33 +274,18 @@ function Invoke-dsqgen {
             $LineCount ++
         }
 
-        if($GenerateAsStoredProcedure) {
-            "" | Out-File -FilePath $OutputFile -Append
-            "SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-DS Query {0}' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))" -f $QueryName | Out-File -FilePath $OutputFile -Append
-        }
-
         # Add two empty lines before the next query.
-        ("" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
-        ("" -f $Query.Name) | Out-File -FilePath $OutputFile -Append
-    }
-
-    if($GenerateAsStoredProcedure) {
-        "    /*************************************   Query End   *************************************/" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-        "    SELECT @QueryCustomLog" | Out-File -FilePath $OutputFile -Append
-        "END" | Out-File -FilePath $OutputFile -Append
-        "GO" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
     }
 
     # Remove the query_0 file when the process is complete. 
-    Remove-Item -Path (Join-Path -Path $OutputDirectory -ChildPath "query_0.sql")
+    Remove-Item -Path "query_0.sql"
 }
 
-if ($GB_001) {Invoke-dsqgen -OutputDirectory $OutputDirectory -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-DS - Queries {0}GB_001.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "GB_001" -ScaleFactor 1      -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_001) {Invoke-dsqgen -OutputDirectory $OutputDirectory -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-DS - Queries {0}TB_001.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_001" -ScaleFactor 1000   -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_003) {Invoke-dsqgen -OutputDirectory $OutputDirectory -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-DS - Queries {0}TB_003.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_003" -ScaleFactor 3000   -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_010) {Invoke-dsqgen -OutputDirectory $OutputDirectory -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-DS - Queries {0}TB_010.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_010" -ScaleFactor 10000  -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_030) {Invoke-dsqgen -OutputDirectory $OutputDirectory -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-DS - Queries {0}TB_030.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_030" -ScaleFactor 30000  -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_100) {Invoke-dsqgen -OutputDirectory $OutputDirectory -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-DS - Queries {0}TB_100.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_100" -ScaleFactor 100000 -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
+if ($GB_001) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "GB_001" -ScaleFactor 1      -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_001) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "TB_001" -ScaleFactor 1000   -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_003) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "TB_003" -ScaleFactor 3000   -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_010) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "TB_010" -ScaleFactor 10000  -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_030) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "TB_030" -ScaleFactor 30000  -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_100) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "TB_100" -ScaleFactor 100000 -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}

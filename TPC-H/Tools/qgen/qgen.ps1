@@ -1,8 +1,8 @@
 # qgen parameters.
 $qgenDirectory              = "C:\GitHub\sample-data\TPC-H\Tools\qgen"  # Directory where qgen.exe, dists.dss, and the 22 sql template files are stored.
-$OutputDirectory            = "C:\GitHub\sample-data\TPC-H"             # Directory where the generated queries will be stored.
+$OutputDirectory            = "C:\GitHub\sample-data\TPC-H\Queries"     # Directory where the generated queries will be stored.
 $SeedValue                  = 081310311                                 # Seed value for the random number generator. According to the spec this values should be the time stamp of the end of the database load time expressed in the format mmddhhmmss where mm is the month, dd the day, hh the hour, mm the minutes and ss the seconds.
-$GenerateAsStoredProcedure  = $false
+$GenerateOneFilePerQuery    = $false
 
 # Which scale factors should be generated?
 $GB_001 = $true
@@ -21,32 +21,37 @@ $TB_100 = $true
 # Change to the directory that contains qgen.
 Set-Location $qgenDirectory
 
-# Create the output directory if it does not exist.
-if (!(Test-Path $OutputDirectory)) {
-    New-Item -ItemType Directory -Path $OutputDirectory
-}
-
 # Store the full location of qgen.exe.
 $qgen = Join-Path -Path $qgenDirectory -ChildPath "qgen.exe"
 
 Clear-Host
 function Invoke-qgen {
     param (
-        [string]$OutputFile,
+        [string]$OutputDirectory,
         [string]$DataSize,
         [int]$ScaleFactor,
         [string]$SeedValue,
-        [boolean]$GenerateAsStoredProcedure
+        [boolean]$GenerateOneFilePerQuery
     )
 
-    Write-Host ("Generating file {0}" -f $OutputFile)
+    # Create the output directory if it does not exist.
+    $OutputDirectory = Join-Path -Path $OutputDirectory -ChildPath ("{0} - {1}" -f $DataSize, $SeedValue)
+    if (!(Test-Path $OutputDirectory)) {
+        $null = New-Item -ItemType Directory -Path $OutputDirectory
+    }
+
+    Write-Host ("Generating files in {0}" -f $OutputDirectory)
+    switch ($GenerateOneFilePerQuery) {
+        $true {Write-Host "Generating one file per query."}
+        $false {Write-Host "Generating one file containing all queries."}
+    }
 
     # Generate the queries and store the text in a variable.
     $Queries = & $qgen -r $SeedValue -c -s $ScaleFactor
 
     $FileList = @(
         @{Query = 1;        QueryName = "01";   StartLine = 7;      EndLine = 27},
-        @{Query = 2;        QueryName = "02";   StartLine = 37;     EndLine = 79},
+        @{Query = 2;        QueryName = "02";   StartLine = 37;     EndLine = 79}
         @{Query = 3;        QueryName = "03";   StartLine = 89;     EndLine = 110},
         @{Query = 4;        QueryName = "04";   StartLine = 120;    EndLine = 140},
         @{Query = 5;        QueryName = "05";   StartLine = 150;    EndLine = 173},
@@ -71,46 +76,26 @@ function Invoke-qgen {
         @{Query = 22;       QueryName = "22";   StartLine = 786;    EndLine = 822}
     )
 
-    # Initiate the output file.
-    "" | Out-File -FilePath $OutputFile
+    $FileHeader = 
+        "/*************************************   Notes   *************************************/`r`n" + 
+        "/*`r`n" + 
+        "    Generated on {0}`r`n" -f (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd") + 
+        "    This is the TPC-H {0} GB ({1}) scale factor queries modified for Fabric DW T-SQL syntax.`r`n" -f $ScaleFactor, $DataSize + 
+        "`r`n" + 
+        "    TPC-H Parameter Substitution (Version 3.0.0 build 0)`r`n" + 
+        "    Using {0} as a seed to the RNG`r`n" -f $SeedValue + 
+        "*/`r`n" + 
+        "`r`n" + 
+        "`r`n"
 
-    if($GenerateAsStoredProcedure) {
-        "DROP PROCEDURE IF EXISTS dbo.RunQuery" | Out-File -FilePath $OutputFile -Append
-        "GO" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-        "CREATE PROCEDURE dbo.RunQuery"  | Out-File -FilePath $OutputFile -Append
-        "    @Dataset                NVARCHAR(50)     = 'TPC-H'," | Out-File -FilePath $OutputFile -Append
-        "    @DataSize               NVARCHAR(50)     = '{0}'," -f $DataSize | Out-File -FilePath $OutputFile -Append
-        "    @Seed                   NVARCHAR(50)     = '{0}'," -f $SeedValue | Out-File -FilePath $OutputFile -Append
-        "    @AdditionalInformation  NVARCHAR(MAX)    = NULL," | Out-File -FilePath $OutputFile -Append
-        "    @QueryCustomLog         NVARCHAR(MAX)    = '[]' OUTPUT" | Out-File -FilePath $OutputFile -Append
-        "AS" | Out-File -FilePath $OutputFile -Append
-        "BEGIN" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-    }
-        
-    "    /*************************************   Notes   *************************************/" | Out-File -FilePath $OutputFile -Append
-    "    /*" | Out-File -FilePath $OutputFile -Append
-    "        Generated on {0}" -f (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd") | Out-File -FilePath $OutputFile -Append
-    "        This is the TPC-H {0} GB ({1}) scale factor queries modified for Fabric DW T-SQL syntax." -f $ScaleFactor, $DataSize | Out-File -FilePath $OutputFile -Append
-    "" | Out-File -FilePath $OutputFile -Append 
-    "        TPC-H Parameter Substitution (Version 3.0.0 build 0)" | Out-File -FilePath $OutputFile -Append
-    "        Using {0} as a seed to the RNG" -f $SeedValue | Out-File -FilePath $OutputFile -Append
-    "    */" | Out-File -FilePath $OutputFile -Append
-    "" | Out-File -FilePath $OutputFile -Append
-    "" | Out-File -FilePath $OutputFile -Append
+    if($false -eq $GenerateOneFilePerQuery) {
+        $OutputFile = Join-Path -Path $OutputDirectory -ChildPath ("Queries.sql")
 
-    if($GenerateAsStoredProcedure) {
-        "    /*************************************   Variables   *************************************/" | Out-File -FilePath $OutputFile -Append
-        "    /* Create the variables for runtime. */" | Out-File -FilePath $OutputFile -Append
-        "    DECLARE @QueryStartTime    DATETIME2(6)" | Out-File -FilePath $OutputFile -Append
-        "    DECLARE @QueryEndTime      DATETIME2(6)" | Out-File -FilePath $OutputFile -Append
-        "    DECLARE @SessionID         INT = @@SPID" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
+        # Initiate the output file.
+        $FileHeader | Out-File -FilePath $OutputFile
     }
     
-    # Loop over the queries, generate the file, cleanup, and write the text to the final output file.
+    # Loop over the queries, generate the file(s), cleanup, and write the text to the final output file.
     foreach ($File in $FileList) {
         $Query          = $File.Query
         $QueryName      = $File.QueryName
@@ -118,13 +103,13 @@ function Invoke-qgen {
         $EndLine        = $File.EndLine
         $RowCountLine   = $File.EndLine + 1
     
+        if($true -eq $GenerateOneFilePerQuery -and $File.Query -notin (15.2, 15.3)) {
+            $OutputFile = Join-Path -Path $OutputDirectory -ChildPath ("Query {0}.sql" -f $File.QueryName)
+            $FileHeader | Out-File -FilePath $OutputFile
+        }
+        
         if($Query -notin (15.2, 15.3)) {"    /*************************************   TPC-H Query {0}   *************************************/" -f $QueryName | Out-File -FilePath $OutputFile -Append}
         if($Query -notin (15.2, 15.3)) {"" | Out-File -FilePath $OutputFile -Append}
-        
-        if($GenerateAsStoredProcedure -and $Query -notin (15.1, 15.3)) {
-            "    SET @QueryStartTime = GETDATE()" | Out-File -FilePath $OutputFile -Append
-            "" | Out-File -FilePath $OutputFile -Append
-        }
         
         # Handle TOP N syntax.
         if ($Query -notin (15.1, 15.2, 15.3)) {
@@ -164,6 +149,8 @@ function Invoke-qgen {
             }
     
             # Query specific handling.
+            if ($QueryName -eq "01" -and $CurrentLine -eq 17)    {$Line = "{1} /* {0} */" -f $Line.Trim(), ("count_big(*) as count_order")}
+            if ($QueryName -eq "04" -and $CurrentLine -eq 122)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ("count_big(*) as order_count")}
             if ($QueryName -eq "07" -and $CurrentLine -eq 211)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ("datepart(year, l_shipdate) as l_year,")}
             if ($QueryName -eq "08" -and $CurrentLine -eq 258)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ("datepart(year, o_orderdate) as o_year,")}
             if ($QueryName -eq "09" -and $CurrentLine -eq 303)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ("datepart(year, o_orderdate) as o_year,")}
@@ -212,33 +199,18 @@ function Invoke-qgen {
             "        option (label = 'TPC-H Query {0}');" -f $QueryName | Out-File -FilePath $OutputFile -Append
         }
 
-        if($GenerateAsStoredProcedure) {
-            "" | Out-File -FilePath $OutputFile -Append
-            "SELECT @QueryCustomLog = JSON_MODIFY(@QueryCustomLog, 'append $', JSON_QUERY([value])) FROM OPENJSON((SELECT @Dataset AS Dataset, @DataSize AS Datasize, @Seed AS Seed, @AdditionalInformation AS AdditionalInformation, @SessionID AS SessionID, 'TPC-H Query {0}' AS Query, @QueryStartTime AS QueryStartTime, GETDATE() AS QueryEndTime FOR JSON PATH))" -f $QueryName | Out-File -FilePath $OutputFile -Append
-        }
-
-        "" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-    }
-    
-    if($GenerateAsStoredProcedure) {
-        "    /*************************************   Query End   *************************************/" | Out-File -FilePath $OutputFile -Append
-        "" | Out-File -FilePath $OutputFile -Append
-        "    SELECT @QueryCustomLog" | Out-File -FilePath $OutputFile -Append
-        "END" | Out-File -FilePath $OutputFile -Append
-        "GO" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
         "" | Out-File -FilePath $OutputFile -Append
     }
 }
 
-if ($GB_001) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}GB_001.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "GB_001" -ScaleFactor 1         -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($GB_010) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}GB_010.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "GB_010" -ScaleFactor 10        -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($GB_030) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}GB_030.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "GB_030" -ScaleFactor 30        -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($GB_100) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}GB_100.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "GB_100" -ScaleFactor 100       -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($GB_300) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}GB_300.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "GB_300" -ScaleFactor 300       -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_001) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}TB_001.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_001" -ScaleFactor 1000      -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_003) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}TB_003.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_003" -ScaleFactor 3000      -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_010) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}TB_010.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_010" -ScaleFactor 10000     -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_030) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}TB_030.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_030" -ScaleFactor 30000     -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
-if ($TB_100) {Invoke-qgen -OutputFile (Join-Path -Path $OutputDirectory -ChildPath ("TPC-H - Queries {0}TB_100.sql" -f $(if($GenerateAsStoredProcedure) {"- Stored Procedure - "}))) -DataSize "TB_100" -ScaleFactor 100000    -SeedValue $SeedValue -GenerateAsStoredProcedure $GenerateAsStoredProcedure}
+if ($GB_001) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "GB_001" -ScaleFactor 1         -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($GB_010) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "GB_010" -ScaleFactor 10        -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($GB_030) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "GB_030" -ScaleFactor 30        -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($GB_100) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "GB_100" -ScaleFactor 100       -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($GB_300) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "GB_300" -ScaleFactor 300       -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_001) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "TB_001" -ScaleFactor 1000      -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_003) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "TB_003" -ScaleFactor 3000      -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_010) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "TB_010" -ScaleFactor 10000     -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_030) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "TB_030" -ScaleFactor 30000     -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($TB_100) {Invoke-qgen -OutputDirectory $OutputDirectory -DataSize "TB_100" -ScaleFactor 100000    -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
