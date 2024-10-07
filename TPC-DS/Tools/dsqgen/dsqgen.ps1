@@ -1,6 +1,6 @@
 # qgen parameters.
 $dsqgenDirectory            = "C:\GitHub\sample-data\TPC-DS\Tools\dsqgen"   # Directory where dsqgen.exe, tpcds.idx, and the template files are stored.
-$OutputDirectory            = "C:\GitHub\sample-data\TPC-DS\Queries"                # Directory where the generated queries will be stored.
+$OutputDirectory            = "C:\GitHub\sample-data\TPC-DS\Queries"        # Directory where the generated queries will be stored.
 $SeedValue                  = 081310311                                     # Seed value for the random number generator. According to the spec this values should be the time stamp of the end of the database load time expressed in the format mmddhhmmss where mm is the month, dd the day, hh the hour, mm the minutes and ss the seconds.
 $GenerateOneFilePerQuery    = $true
 
@@ -243,7 +243,12 @@ function Invoke-dsqgen {
             if ($Query.Name -eq "05" -and $LineCount -eq 102) {$Line = "{1} /* {0} */" -f $Line.Trim(), (", 'store' + s_store_id as id")}
             if ($Query.Name -eq "05" -and $LineCount -eq 109) {$Line = "{1} /* {0} */" -f $Line.Trim(), (", 'catalog_page' + cp_catalog_page_id as id")}
             if ($Query.Name -eq "05" -and $LineCount -eq 116) {$Line = "{1} /* {0} */" -f $Line.Trim(), (", 'web_site' + web_site_id as id")}
-            if ($Query.Name -eq "06" -and $LineCount -eq 1)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count", "count_big"))}
+            if ($Query.Name -eq "06" -and $LineCount -eq 1)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count(*)", "count_big(*)"))}
+            if ($Query.Name -eq "09" -and $LineCount -eq 1)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count(*)", "count_big(*)"))}
+            if ($Query.Name -eq "09" -and $LineCount -eq 10)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count(*)", "count_big(*)"))}
+            if ($Query.Name -eq "09" -and $LineCount -eq 19)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count(*)", "count_big(*)"))}
+            if ($Query.Name -eq "09" -and $LineCount -eq 28)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count(*)", "count_big(*)"))}
+            if ($Query.Name -eq "09" -and $LineCount -eq 37)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count(*)", "count_big(*)"))}
             if ($Query.Name -eq "14" -and $LineCount -eq 32)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("{0} AS x" -f $Line.Trim())}
             if ($Query.Name -eq "23" -and $LineCount -eq 20)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("group by c_customer_sk) AS x),")}
             if ($Query.Name -eq "23" -and $LineCount -eq 48)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) AS x")}
@@ -255,6 +260,12 @@ function Invoke-dsqgen {
             if ($Query.Name -eq "70" -and $LineCount -eq 33)  {$Line = "{1} /* {0} */" -f $Line.Trim(), (",case when grouping(s_state)+grouping(s_county) = 0 then s_state end" -f $Line.Trim())}
             if ($Query.Name -eq "72" -and $LineCount -eq 20)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("and d3.d_date > dateadd(day, 5, d1.d_date)" -f $Line.Trim())}
             if ($Query.Name -eq "86" -and $LineCount -eq 21)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("case when grouping(i_category)+grouping(i_class) = 0 then i_category end," -f $Line.Trim())}
+            if ($Query.Name -eq "97" -and $LineCount -eq 17)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("sum(case", "sum(convert(bigint, case"))}
+            if ($Query.Name -eq "97" -and $LineCount -eq 17)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("end)", "end))"))}
+            if ($Query.Name -eq "97" -and $LineCount -eq 18)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("sum(case", "sum(convert(bigint, case"))}
+            if ($Query.Name -eq "97" -and $LineCount -eq 18)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("end)", "end))"))}
+            if ($Query.Name -eq "97" -and $LineCount -eq 19)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("sum(case", "sum(convert(bigint, case"))}
+            if ($Query.Name -eq "97" -and $LineCount -eq 19)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("end)", "end))"))}
 
             # If this is the last line of the file, add the OPTION (LABEL) to the query.
             if ($LineCount -eq $FileContent.Count) {
