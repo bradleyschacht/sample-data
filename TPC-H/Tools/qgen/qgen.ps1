@@ -169,7 +169,7 @@ function Invoke-qgen {
                     $Pattern = ".*create view (?<ViewName>.+) \(supplier.+"
                     $PatternMatches = ($Line | Select-String -Pattern $Pattern).Matches
                     if ($PatternMatches) {
-                        $Line = "drop view if exists {0} /*  New line added for error handling.  */`r`n        EXEC ('{1}" -f $PatternMatches[0].Groups['ViewName'].Value, $Line
+                        $Line = "IF NOT EXISTS(SELECT * FROM sys.views WHERE name = '{0}') /*  New line added for error handling.  */`r`n        EXEC ('{1}" -f $PatternMatches[0].Groups['ViewName'].Value, $Line
                     }
                 }
                 else {
@@ -185,7 +185,7 @@ function Invoke-qgen {
                 $Pattern = ".*drop view (?<ViewName>.+)"
                 $PatternMatches = ($Line | Select-String -Pattern $Pattern).Matches
                 if ($PatternMatches) {
-                    $Line = "drop view if exists {0} /*  {1}  */" -f $PatternMatches[0].Groups['ViewName'].Value, $Line
+                    $Line = "/*  {0}  */" -f $Line
                 }
             }
             

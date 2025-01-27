@@ -11,7 +11,7 @@
 
     /*************************************   TPC-H Query 15   *************************************/
 
-        drop view if exists revenue0 /*  New line added for error handling.  */
+        IF NOT EXISTS(SELECT * FROM sys.views WHERE name = 'revenue0') /*  New line added for error handling.  */
         EXEC ('create view revenue0 (supplier_no, total_revenue) as
         	select
         		l_suppkey,
@@ -47,6 +47,6 @@
         option (label = 'TPC-H Query 15');
 
 
-        drop view if exists revenue0 /*  drop view revenue0  */
+        /*  drop view revenue0  */
 
 
