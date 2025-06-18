@@ -6,6 +6,8 @@ $GenerateOneFilePerQuery    = $true
 
 # Which scale factors should be generated?
 $GB_001 = $true
+$GB_100 = $true
+$GB_300 = $true
 $TB_001 = $true
 $TB_003 = $true
 $TB_010 = $true
@@ -250,11 +252,14 @@ function Invoke-dsqgen {
             if ($Query.Name -eq "09" -and $LineCount -eq 28)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count(*)", "count_big(*)"))}
             if ($Query.Name -eq "09" -and $LineCount -eq 37)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ($Line.Trim().Replace("count(*)", "count_big(*)"))}
             if ($Query.Name -eq "14" -and $LineCount -eq 32)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("{0} AS x" -f $Line.Trim())}
+            if ($Query.Name -eq "14" -and $LineCount -eq 101)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("{0} OPTION (LABEL = 'TPC-DS Query 14A');" -f $Line.Trim().Replace(";", ""))}
             if ($Query.Name -eq "23" -and $LineCount -eq 20)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("group by c_customer_sk) AS x),")}
             if ($Query.Name -eq "23" -and $LineCount -eq 48)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) AS x")}
             if ($Query.Name -eq "23" -and $LineCount -eq 69)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("group by c_customer_sk) AS x),")}
             if ($Query.Name -eq "23" -and $LineCount -eq 102) {$Line = "{1} /* {0} */" -f $Line.Trim(), ("group by c_last_name,c_first_name) AS x")}
+            if ($Query.Name -eq "23" -and $LineCount -eq 49)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("{0} OPTION (LABEL = 'TPC-DS Query 23A');" -f $Line.Trim().Replace(";", ""))}
             if ($Query.Name -eq "36" -and $LineCount -eq 25)  {$Line = "{1} /* {0} */" -f $Line.Trim(), (",case when grouping(i_category)+grouping(i_class) = 0 then i_category end" -f $Line.Trim())}
+            if ($Query.Name -eq "39" -and $LineCount -eq 25)  {$Line = "{1} /* {0} */" -f $Line.Trim(), ("{0} OPTION (LABEL = 'TPC-DS Query 39A');" -f $Line.Trim().Replace(";", ""))}
             if ($Query.Name -eq "41" -and $LineCount -eq 1)   {$Line = "{1} /* {0} */" -f $Line.Trim(), ("select distinct top 100 (i_product_name)")}
             if ($Query.Name -eq "49" -and $LineCount -eq 124) {$Line = "{1} /* {0} */" -f $Line.Trim(), (") AS x")}
             if ($Query.Name -eq "70" -and $LineCount -eq 33)  {$Line = "{1} /* {0} */" -f $Line.Trim(), (",case when grouping(s_state)+grouping(s_county) = 0 then s_state end" -f $Line.Trim())}
@@ -270,11 +275,17 @@ function Invoke-dsqgen {
             # If this is the last line of the file, add the OPTION (LABEL) to the query.
             if ($LineCount -eq $FileContent.Count) {
                 if ($Line.trim() -eq ";") {
-                    ("        OPTION (LABEL = 'TPC-DS Query {0}');" -f $Query.Name) |  Out-File -FilePath $OutputFile -Append
+                    if     ($Query.Name -eq "14") {("        OPTION (LABEL = 'TPC-DS Query 14B');") |  Out-File -FilePath $OutputFile -Append}
+                    elseif ($Query.Name -eq "23") {("        OPTION (LABEL = 'TPC-DS Query 23B');") |  Out-File -FilePath $OutputFile -Append}
+                    elseif ($Query.Name -eq "39") {("        OPTION (LABEL = 'TPC-DS Query 39B');") |  Out-File -FilePath $OutputFile -Append}
+                    else {("        OPTION (LABEL = 'TPC-DS Query {0}');" -f $Query.Name) |  Out-File -FilePath $OutputFile -Append}
                 }
                 else {
                     $Line.replace(";", "") |  Out-File -FilePath $OutputFile -Append
-                    ("        OPTION (LABEL = 'TPC-DS Query {0}');" -f $Query.Name) |  Out-File -FilePath $OutputFile -Append
+                    if     ($Query.Name -eq "14") {("        OPTION (LABEL = 'TPC-DS Query 14B');") |  Out-File -FilePath $OutputFile -Append}
+                    elseif ($Query.Name -eq "23") {("        OPTION (LABEL = 'TPC-DS Query 23B');") |  Out-File -FilePath $OutputFile -Append}
+                    elseif ($Query.Name -eq "39") {("        OPTION (LABEL = 'TPC-DS Query 39B');") |  Out-File -FilePath $OutputFile -Append}
+                    else {("        OPTION (LABEL = 'TPC-DS Query {0}');" -f $Query.Name) |  Out-File -FilePath $OutputFile -Append}
                 }
             }
             # If it is not the last line of the file, then just write the line to the output file. 
@@ -295,6 +306,8 @@ function Invoke-dsqgen {
 }
 
 if ($GB_001) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "GB_001" -ScaleFactor 1      -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($GB_100) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "GB_100" -ScaleFactor 100    -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
+if ($GB_300) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "GB_300" -ScaleFactor 300    -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
 if ($TB_001) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "TB_001" -ScaleFactor 1000   -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
 if ($TB_003) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "TB_003" -ScaleFactor 3000   -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}
 if ($TB_010) {Invoke-dsqgen -OutputDirectory $OutputDirectory -DataSize "TB_010" -ScaleFactor 10000  -SeedValue $SeedValue -GenerateOneFilePerQuery $GenerateOneFilePerQuery}

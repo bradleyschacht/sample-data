@@ -1,6 +1,6 @@
 /*************************************   Notes   *************************************/
 /*
-    Generated on 2024-10-07
+    Generated on 2025-04-23
     This is the TPC-DS 1 GB (GB_001) scale factor queries modified for Fabric DW T-SQL syntax.
 
     TPC-DS Parameter Substitution (Version 3.2.0)
@@ -35,7 +35,7 @@
           and inv2.d_moy=2+1
         order by inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean,inv1.cov
                 ,inv2.d_moy,inv2.mean, inv2.cov
-        ;
+         OPTION (LABEL = 'TPC-DS Query 39A'); /* ; */
         with inv as
         (select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy
                ,stdev,mean, case mean when 0 then null else stdev/mean end cov
@@ -61,6 +61,6 @@
           and inv1.cov > 1.5
         order by inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean,inv1.cov
                 ,inv2.d_moy,inv2.mean, inv2.cov
-        OPTION (LABEL = 'TPC-DS Query 39');
+        OPTION (LABEL = 'TPC-DS Query 39B');
 
 

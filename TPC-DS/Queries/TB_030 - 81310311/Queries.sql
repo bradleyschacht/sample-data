@@ -1,6 +1,6 @@
 /*************************************   Notes   *************************************/
 /*
-    Generated on 2024-10-07
+    Generated on 2025-04-23
     This is the TPC-DS 30000 GB (TB_030) scale factor queries modified for Fabric DW T-SQL syntax.
 
     TPC-DS Parameter Substitution (Version 3.2.0)
@@ -907,7 +907,7 @@
          ) y
          group by rollup (channel, i_brand_id,i_class_id,i_category_id)
          order by channel,i_brand_id,i_class_id,i_category_id
-         ;
+         OPTION (LABEL = 'TPC-DS Query 14A'); /* ; */
         with  cross_items as
          (select i_item_sk ss_item_sk
          from item,
@@ -1013,7 +1013,7 @@
            and this_year.i_class_id = last_year.i_class_id
            and this_year.i_category_id = last_year.i_category_id
          order by this_year.channel, this_year.i_brand_id, this_year.i_class_id, this_year.i_category_id
-        OPTION (LABEL = 'TPC-DS Query 14');
+        OPTION (LABEL = 'TPC-DS Query 14B');
 
 
     /*************************************   TPC-DS Query 15   *************************************/
@@ -1309,7 +1309,7 @@
                  and ws_sold_date_sk = d_date_sk 
                  and ws_item_sk in (select item_sk from frequent_ss_items)
         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) AS x /* and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) */
-         ;
+         OPTION (LABEL = 'TPC-DS Query 23A'); /* ; */
         with frequent_ss_items as
         (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt /* (select substr(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt */
           from store_sales
@@ -1364,7 +1364,7 @@
                  and ws_bill_customer_sk = c_customer_sk
         group by c_last_name,c_first_name) AS x /* group by c_last_name,c_first_name) */
              order by c_last_name,c_first_name,sales
-        OPTION (LABEL = 'TPC-DS Query 23');
+        OPTION (LABEL = 'TPC-DS Query 23B');
 
 
     /*************************************   TPC-DS Query 24   *************************************/
@@ -2054,7 +2054,7 @@
           and inv2.d_moy=2+1
         order by inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean,inv1.cov
                 ,inv2.d_moy,inv2.mean, inv2.cov
-        ;
+         OPTION (LABEL = 'TPC-DS Query 39A'); /* ; */
         with inv as
         (select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy
                ,stdev,mean, case mean when 0 then null else stdev/mean end cov
@@ -2080,7 +2080,7 @@
           and inv1.cov > 1.5
         order by inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean,inv1.cov
                 ,inv2.d_moy,inv2.mean, inv2.cov
-        OPTION (LABEL = 'TPC-DS Query 39');
+        OPTION (LABEL = 'TPC-DS Query 39B');
 
 
     /*************************************   TPC-DS Query 40   *************************************/

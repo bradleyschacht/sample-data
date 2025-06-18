@@ -1,6 +1,6 @@
 /*************************************   Notes   *************************************/
 /*
-    Generated on 2025-04-18
+    Generated on 2025-04-23
     This is the TPC-DS 100 GB (GB_100) scale factor queries modified for Fabric DW T-SQL syntax.
 
     TPC-DS Parameter Substitution (Version 3.2.0)
@@ -111,7 +111,7 @@
          ) y
          group by rollup (channel, i_brand_id,i_class_id,i_category_id)
          order by channel,i_brand_id,i_class_id,i_category_id
-         ;
+         OPTION (LABEL = 'TPC-DS Query 14A'); /* ; */
         with  cross_items as
          (select i_item_sk ss_item_sk
          from item,
@@ -217,6 +217,6 @@
            and this_year.i_class_id = last_year.i_class_id
            and this_year.i_category_id = last_year.i_category_id
          order by this_year.channel, this_year.i_brand_id, this_year.i_class_id, this_year.i_category_id
-        OPTION (LABEL = 'TPC-DS Query 14');
+        OPTION (LABEL = 'TPC-DS Query 14B');
 
 

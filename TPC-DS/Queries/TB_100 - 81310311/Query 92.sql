@@ -1,6 +1,6 @@
 /*************************************   Notes   *************************************/
 /*
-    Generated on 2024-10-07
+    Generated on 2025-04-23
     This is the TPC-DS 100000 GB (TB_100) scale factor queries modified for Fabric DW T-SQL syntax.
 
     TPC-DS Parameter Substitution (Version 3.2.0)
